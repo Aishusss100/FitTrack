@@ -1,0 +1,31 @@
+/* components/SplashScreen.css */
+.SplashScreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-size: cover; /* Ensure the image covers the entire screen */
+    background-position: center; /* Center the background image */
+    font-family: 'Arial', sans-serif;
+    font-size: 48px; /* Larger font for the splash screen */
+    color: white;
+}
+
+.SplashShape {
+    background-color: rgba(45, 4, 4, 0.8); /* Semi-transparent maroon color */
+    width: 200px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
+    animation: fadeinout 3s forwards; /* Add fade-in and fade-out animation */
+    border-radius: 20px; /* Rounded edges for a dumbbell shape */
+}
+
+@keyframes fadeinout {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}

@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: url('../assets/attractive-healthy-young-woman-with-fitness-mat-using-mobile-phone-gym.jpg') no-repeat center center fixed; /* Correct path to your image */
+    background-size: cover; /* Cover the entire background */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.signup-box {
+    background: rgba(255, 255, 255, 0.8); /* Slightly transparent background for the box */
+    padding: 40px;
+    border-radius: 30px; /* More rounded shape */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 400px;
+    animation: fadeIn 1s ease-in-out, popIn 0.5s ease-in-out;
+    transform: scale(1);
+}
+
+.signup-box h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #333;
+    font-weight: bold;
+}
+
+.signup-box input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 20px; /* More rounded input fields */
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.signup-box input:focus {
+    border-color: #42a5f5;
+    box-shadow: 0 0 8px rgba(66, 165, 245, 0.2);
+}
+
+.signup-box button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 20px; /* More rounded button */
+    background: linear-gradient(135deg, #780000, #9d0e0e); /* Maroon gradient with glazing effect */
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.signup-box button:hover {
+    background: linear-gradient(135deg, #9d0e0e, #780000);
+    transform: scale(1.05);
+}
+
+.signup-box .message {
+    margin-top: 10px;
+    color: red;
+}
+
+.signup-box .login-link {
+    margin-top: 10px;
+    color: #333;
+}
+
+.signup-box .login-link span {
+    color: #42a5f5;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.signup-box .login-link span:hover {
+    color: #1e88e5;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* @keyframes popIn {
+    0% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+} */

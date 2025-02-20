@@ -1,0 +1,41 @@
+/* components/TitleBars.css */
+.TitleBar {
+    background-color: rgb(45, 4, 4); /* Maroon color */
+    width: 100%; /* Full width */
+    height: 50px; /* Set specific height */
+    color: white;
+    text-align: center;
+    position: fixed;
+    top: 0; /* Fixed position at the top */
+    left: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
+    border-bottom-left-radius: 15px; /* Rounded edges at the bottom */
+    border-bottom-right-radius: 15px; /* Rounded edges at the bottom */
+    font-family: 'Arial', sans-serif; /* Elegant font */
+    font-size: 18px; /* Font size for better visibility */
+    background: linear-gradient(135deg, rgb(59, 1, 1), #9d0e0e); /* Add a glazing effect */
+    display: flex;
+    align-items: center; /* Center content vertically */
+    justify-content: space-between; /* Space between the title and button */
+    padding: 0 20px; /* Add padding to the sides */
+    z-index: 1000; /* Ensure it stays on top */
+}
+
+.logout-button {
+    background-color: rgb(59, 1, 1); /* Slightly darker maroon color */
+    color: white;
+    border: none;
+    padding: 10px 15px; /* Increase padding for better visibility */
+    border-radius: 20px; /* More rounded corners */
+    cursor: pointer;
+    font-family: 'Arial', 'sans-serif';
+    font-size: 16px; /* Larger font size for better visibility */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-left: 0px; /* Reduced margin to move it left */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
+}
+
+.logout-button:hover {
+    background-color: #9d0e0e; /* Darker shade of maroon on hover */
+    transform: scale(1.05); /* Slightly enlarge the button on hover */
+}
