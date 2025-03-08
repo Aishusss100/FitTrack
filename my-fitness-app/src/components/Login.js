@@ -7,47 +7,73 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setMessage('');
+        setIsLoading(true);
+        
         try {
-            const response = await axios.post('http://localhost:5000/api/login', { username, password });
-            setMessage(response.data.message);
-            if (response.data.message === 'Login successful') {
+            const response = await axios.post('http://localhost:5000/api/login', {
+                username: username,
+                password: password
+            }, {
+                withCredentials: true // Important for cookies/session
+            });
+            
+            console.log('Login response:', response.data);
+            setMessage(response.data.message || 'Login successful');
+            setIsLoading(false);
+            
+            if (response.data.message === 'Login successful' || response.status === 200) {
                 navigate('/home');
             }
         } catch (error) {
-            setMessage('Login failed. Please try again.');
+            console.error('Login error:', error);
+            setMessage(error.response?.data?.message || 'Login failed. Please check your credentials.');
+            setIsLoading(false);
         }
     };
 
     return (
         <div className="login-container">
-            <div className="login-box">
-                <h1>Login</h1>
-                <form onSubmit={handleLogin}>
+            <h1>Login</h1>
+            {message && <div className={message.includes('failed') ? "error-message" : "success-message"}>{message}</div>}
+            <form onSubmit={handleLogin}>
+                <div className="form-group">
+                    <label htmlFor="username">Username</label>
                     <input
                         type="text"
-                        placeholder="Username"
+                        id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="password">Password</label>
                     <input
                         type="password"
-                        placeholder="Password"
+                        id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button type="submit">Login</button>
-                </form>
-                <p className="message">{message}</p>
-                <p className="signup-link">
-                    Don't have an account? <span onClick={() => navigate('/signup')}>Sign Up</span>
-                </p>
-            </div>
+                </div>
+                <button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Logging in...' : 'Login'}
+                </button>
+            </form>
+            <p>
+                Don't have an account? <span 
+                    className="signup-link" 
+                    onClick={() => navigate('/signup')}
+                >
+                    Sign Up
+                </span>
+            </p>
         </div>
     );
 };

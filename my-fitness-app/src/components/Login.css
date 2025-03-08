@@ -2,146 +2,100 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #89f7fe, #66a6ff); /* Gradient background */
-}
-
-.login-container {
+    background: url('../assets/attractive-healthy-young-woman-with-fitness-mat-using-mobile-phone-gym.jpg') no-repeat center center fixed;
+    background-size: cover;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
-.login-box {
-    background: #fff;
-    padding: 40px;
-    border-radius: 30px; /* Rounded shape */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+.login-container {
+    background: rgba(255, 255, 255, 0.9); /* Slight transparency for better text visibility */
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     text-align: center;
-    animation: fadeIn 1s ease-in-out;
-    transform: scale(1);
+    width: 400px;
 }
 
-.login-box h1 {
+.login-container h1 {
     margin-bottom: 20px;
-    font-size: 28px;
-    color: #333;
+    font-size: 32px;
+    color: #4a4a4a;
     font-weight: bold;
 }
 
-.login-box input {
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.form-group input {
     width: 100%;
     padding: 12px;
-    margin-bottom: 20px;
     border: 1px solid #ccc;
-    border-radius: 20px; /* Rounded input fields */
+    border-radius: 15px;
     font-size: 16px;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.login-box input:focus {
-    border-color: #42a5f5;
-    box-shadow: 0 0 8px rgba(66, 165, 245, 0.2);
+.form-group input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    outline: none;
 }
 
-.login-box button {
+button {
     width: 100%;
     padding: 12px;
     border: none;
-    border-radius: 20px; /* Rounded button */
-    background: linear-gradient(135deg, #780000, #9d0e0e); /* Maroon gradient with glazing effect */
-    color: #fff;
+    border-radius: 15px;
+    background: #800000; /* Maroon background */
+    color: #fff; /* White text */
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
+    transition: background 0.3s, transform 0.2s;
 }
 
-.login-box button:hover {
-    background: linear-gradient(135deg, #9d0e0e, #780000);
-    transform: scale(1.05);
+button:hover {
+    background: #990000; /* Slightly lighter maroon on hover */
+    transform: scale(1.05); /* Slight zoom effect */
 }
 
-.login-box .message {
-    margin-top: 10px;
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.error-message {
     color: red;
-    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-.login-box .toggle-message {
-    margin-top: 10px;
-    color: #333;
-    font-weight: bold; /* Make the entire message bold */
+.success-message {
+    color: green;
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-.login-box .toggle-message span {
-    color: #780000; /* Darker maroon color for the "Sign up" part */
+.signup-link {
+    color: #301207;
     cursor: pointer;
     font-weight: bold;
     transition: color 0.3s;
 }
 
-.login-box .toggle-message span:hover {
-    color: #9d0e0e; /* Even darker maroon color on hover */
-}
-
-/* New styles for the signup section */
-.login-box .signup-section {
-    margin-top: 20px;
-    background: #333; /* Dark background */
-    padding: 20px;
-    border-radius: 20px; /* Rounded shape */
-    color: #fff; /* White text color */
-    animation: fadeIn 1s ease-in-out;
-}
-
-.login-box .signup-section h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #fff; /* White text color */
-    font-weight: bold;
-}
-
-.login-box .signup-section input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #fff;
-    border-radius: 20px; /* Rounded input fields */
-    font-size: 16px;
-    transition: all 0.3s ease;
-}
-
-.login-box .signup-section input:focus {
-    border-color: #9d0e0e; /* Maroon focus color */
-    box-shadow: 0 0 8px rgba(157, 14, 14, 0.2);
-}
-
-.login-box .signup-section button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 20px; /* Rounded button */
-    background: linear-gradient(135deg, #780000, #9d0e0e); /* Maroon gradient with glazing effect */
-    color: #fff;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
-}
-
-.login-box .signup-section button:hover {
-    background: linear-gradient(135deg, #9d0e0e, #780000);
-    transform: scale(1.05);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.signup-link:hover {
+    color: #0056b3;
 }
