@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session, redirect, url_for,Response
+from flask import Flask, request, jsonify, session, redirect, url_for, Response
 from flask_cors import CORS
 import cv2
 import mediapipe as mp
@@ -6,8 +6,10 @@ import numpy as np
 import sqlite3
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 app.secret_key = 'your_secret_key'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Helps with CORS issues
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -18,6 +20,7 @@ exercise_started = False
 target_reps = 0
 target_achieved = False
 cap = None
+
 # Initialize SQLite database
 def init_db():
     conn = sqlite3.connect('users.db')
@@ -57,6 +60,14 @@ def calculate_angle(a, b, c):
         
     return angle
 
+# New endpoint to check session status
+@app.route('/api/check_session', methods=['GET'])
+def check_session():
+    if 'username' in session:
+        return jsonify({'logged_in': True, 'username': session['username']})
+    else:
+        return jsonify({'logged_in': False})
+
 # API endpoint for user login
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -72,11 +83,20 @@ def api_login():
     
     if user:
         session['username'] = username
+        session.modified = True  # Ensure the session is saved
+        print(f"Session set in login: {session}")
+        print(f"Session ID: {request.cookies.get('session')}")
         for exercise in exercises.values():
             exercise['counter'] = 0  # Reset counters on login
-        return jsonify({'message': 'Login successful'})
+        return jsonify({'message': 'Login successful', 'username': username})
     else:
         return jsonify({'message': 'Invalid username or password'}), 401
+
+# API endpoint for user logout
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    session.pop('username', None)
+    return jsonify({'message': 'Logout successful'})
 
 # API endpoint for user signup
 @app.route('/api/signup', methods=['POST'])
@@ -108,6 +128,41 @@ def api_signup():
     finally:
         conn.close()
 
+@app.route('/api/profile', methods=['GET'])
+def get_profile():
+    # Debugging: Check session data
+    print(f"Session data at /api/profile: {session}")
+    print(f"Session cookie: {request.cookies.get('session')}")
+
+    # Verify if the user is logged in by checking the session
+    if 'username' not in session:
+        print("User not logged in - session['username'] missing")
+        return jsonify({'message': 'User not logged in'}), 401
+
+    # Retrieve username from the session
+    username = session['username']
+    print(f"Fetching profile for username: {username}")  # Debugging
+
+    # Query the database for the user's details
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('SELECT username, name, date_of_birth, email FROM users WHERE username = ?', (username,))
+    user = c.fetchone()
+    conn.close()
+
+    # Check if user exists in the database
+    if user:
+        print(f"User data found: {user}")  # Debugging
+        return jsonify({
+            'username': user[0],
+            'name': user[1],
+            'date_of_birth': user[2],
+            'email': user[3]
+        })
+    else:
+        print("User not found in database")  # Debugging
+        return jsonify({'message': 'User not found'}), 404
+
 # API endpoint for getting exercise data
 @app.route('/api/exercises', methods=['GET'])
 def get_exercises():
@@ -124,6 +179,7 @@ def api_change_exercise():
         return jsonify({'message': 'Exercise changed successfully'})
     else:
         return jsonify({'message': 'Invalid exercise'}), 400
+
 # API endpoint for setting the target
 @app.route('/api/set_target', methods=['POST'])
 def set_target():
@@ -136,7 +192,7 @@ def set_target():
 # API endpoint for starting the exercise
 @app.route('/api/start', methods=['POST'])
 def start_exercise():
-    global exercise_started, exercises,target_achieved,cap
+    global exercise_started, exercises, target_achieved, cap
     exercise_started = True
     target_achieved = False
     for exercise in exercises.values():
@@ -149,13 +205,14 @@ def start_exercise():
 # API endpoint for stopping the exercise
 @app.route('/api/stop', methods=['POST'])
 def stop_exercise():
-    global exercise_started,cap
+    global exercise_started, cap
     exercise_started = False
-     # Release video capture
+    # Release video capture
     if cap is not None and cap.isOpened():
         cap.release()
         cap = None
     return jsonify({'message': 'Exercise stopped'})
+
 # Video Capture
 cap = cv2.VideoCapture(0)
 
