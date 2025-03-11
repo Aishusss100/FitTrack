@@ -6,6 +6,7 @@ import numpy as np
 import sqlite3
 
 app = Flask(__name__)
+
 CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 app.secret_key = 'your_secret_key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Helps with CORS issues
@@ -17,7 +18,7 @@ mp.solutions.pose
 
 # Global variables for exercise state management
 exercise_started = False
-target_reps = 0
+target_reps = 3
 target_achieved = False
 cap = None
 
@@ -280,13 +281,20 @@ def generate_frames():
 
                             if exercises['single_arm_dumbbell']['counter'] >= target_reps:
                                 target_achieved = True
+                                print("Target Achieved")
 
                 except:
                     pass
 
                 # Render curl counter
-                cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
+                cv2.rectangle(image, (0, 0), (330, 70), (345, 117, 16), -1)
                 
+
+                cv2.putText(image, 'TARGET REPS', (225, 12), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+                cv2.putText(image, str(target_reps), 
+                            (250, 60), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
                 # Rep data
                 cv2.putText(image, 'REPS', (15, 12), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
@@ -295,7 +303,7 @@ def generate_frames():
                             cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
 
                 # Stage data
-                cv2.putText(image, 'STAGE', (65, 12), 
+                cv2.putText(image, 'STAGE', (125, 12), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
                 cv2.putText(image, exercises[current_exercise]['stage'], 
                             (60, 60), 

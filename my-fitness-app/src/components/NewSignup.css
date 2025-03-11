@@ -64,7 +64,6 @@ body {
 }
 
 .signup-box button:hover {
-    background: linear-gradient(135deg, #9d0e0e, #780000);
     transform: scale(1.05);
 }
 

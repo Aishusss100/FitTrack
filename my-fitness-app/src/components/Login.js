@@ -6,6 +6,7 @@ import './Login.css';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -52,17 +53,26 @@ const Login = () => {
                         required
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group_password-group">
                     <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                    <div className="password-wrapper">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button 
+                            type="button" 
+                            className="toggle-password" 
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? '🙈  ' : '👁️'}
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" disabled={isLoading}>
+                <button type="submit" className="toggle-submit"  disabled={isLoading}>
                     {isLoading ? 'Logging in...' : 'Login'}
                 </button>
             </form>

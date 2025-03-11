@@ -40,12 +40,13 @@ body {
 }
 
 .form-group input {
-    width: 100%;
+    width: 87%;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 15px;
     font-size: 16px;
     transition: border-color 0.3s, box-shadow 0.3s;
+    padding-right: 40px;
 }
 
 .form-group input:focus {
@@ -54,7 +55,58 @@ body {
     outline: none;
 }
 
-button {
+.form-group_password-group {
+    margin-bottom: 20px;
+}
+
+.form-group_password-group label {
+    display: flex;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.password-wrapper {
+    position: relative;
+    width: auto; /* Keeps the input full width */
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    padding-right: 40px;
+}
+
+.password-wrapper input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    outline: none;
+}
+
+.toggle-password {
+    position: absolute;
+    align-content: center;
+    right: 1px;
+    width: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 15px;
+}
+.toggle-password:hover {
+    color: #000;
+}
+
+.toggle-submit {
     width: 100%;
     padding: 12px;
     border: none;
@@ -64,15 +116,15 @@ button {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    transition: 0.3s, transform 0.2s;
 }
 
-button:hover {
-    background: #990000; /* Slightly lighter maroon on hover */
+.toggle-submit:hover {
+
     transform: scale(1.05); /* Slight zoom effect */
 }
 
-button:disabled {
+.toggle-submit:disabled {
     background: #ccc;
     cursor: not-allowed;
 }
