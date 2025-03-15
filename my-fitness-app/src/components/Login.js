@@ -16,24 +16,44 @@ const Login = () => {
         setMessage('');
         setIsLoading(true);
         
+
+        let response = null;
+        let errorMessage = 'Login failed. Please check your credentials.';
+
         try {
-            const response = await axios.post('http://localhost:5000/api/login', {
+            response = await axios.post('http://localhost:5000/api/login', {
                 username: username,
                 password: password
             }, {
-                withCredentials: true // Important for cookies/session
+                withCredentials: true
             });
+        } catch (localError) {
+            console.error('Login error (localhost):', localError);
+    
+            // Try network IP if localhost fails
+            try {
+                response = await axios.post('http://192.168.220.149:5000/api/login', {
+                    username: username,
+                    password: password
+                }, {
+                    withCredentials: true
+                });
+            } catch (networkError) {
+                console.error('Login error (network):', networkError);
+                errorMessage = networkError.response?.data?.message || errorMessage;
+            }
+        }
             
+        if (response) {
             console.log('Login response:', response.data);
             setMessage(response.data.message || 'Login successful');
             setIsLoading(false);
-            
+
             if (response.data.message === 'Login successful' || response.status === 200) {
                 navigate('/home');
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            setMessage(error.response?.data?.message || 'Login failed. Please check your credentials.');
+        } else {
+            setMessage(errorMessage);
             setIsLoading(false);
         }
     };

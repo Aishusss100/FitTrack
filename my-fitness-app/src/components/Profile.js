@@ -14,18 +14,37 @@ const Profile = () => {
 
     useEffect(() => {
         const fetchProfileData = async () => {
+            setLoading(true);
+            setError(null); // Reset error on each fetch attempt
+
+            let response = null;
+            let errorMessage = 'Failed to load profile data';
+
+            // Try localhost first
             try {
-                setLoading(true);
-                const response = await axios.get('http://localhost:5000/api/profile', {
-                    withCredentials: true // Important for cookies/session
+                response = await axios.get('http://localhost:5000/api/profile', {
+                    withCredentials: true
                 });
-                
+            } catch (localError) {
+                console.error('Error fetching profile data (localhost):', localError);
+
+                // Try network IP if localhost fails
+                try {
+                    response = await axios.get('http://192.168.220.149:5000/api/profile', {
+                        withCredentials: true
+                    });
+                } catch (networkError) {
+                    console.error('Error fetching profile data (network):', networkError);
+                    errorMessage = networkError.response?.data?.message || errorMessage;
+                    setError(errorMessage);
+                }
+            }
+
+            if (response) {
                 console.log('Profile data response:', response.data);
                 setProfileData(response.data);
                 setLoading(false);
-            } catch (error) {
-                console.error('Error fetching profile data:', error);
-                setError(error.response?.data?.message || 'Failed to load profile data');
+            } else {
                 setLoading(false);
             }
         };

@@ -20,25 +20,51 @@ const NewSignup = () => {
             setMessage('Passwords do not match.');
             return;
         }
+
+    let response = null;
+    let errorMessage = 'Login failed. Please check your credentials.';
+
+    try {
+        response = await axios.post('http://localhost:5000/api/signup', {
+            username,
+            password,
+            name,
+            dateOfBirth,
+            email,
+        }, {
+            withCredentials: true
+        });
+    } catch (localError) {
+        console.error('Signup error (localhost):', localError);
+
+        // Try network IP if localhost fails
         try {
-            const response = await axios.post('http://localhost:5000/api/signup', {
+            response = await axios.post('http://192.168.220.149:5000/api/login', {
                 username,
                 password,
                 name,
                 dateOfBirth,
                 email,
+            }, {
+                withCredentials: true
             });
-            console.log("Response:", response.data);
-            if (response.data.message === 'Signup successful') {
-                navigate('/login');
-            } else {
-                setMessage(response.data.message);
-            }
-        } catch (error) {
-            console.error("Error during signup:", error);
-            setMessage('Error signing up.');
+        } catch (networkError) {
+            console.error('Signup error (network):', networkError);
+            errorMessage = networkError.response?.data?.message || errorMessage;
         }
-    };
+    }
+        
+    if (response) {
+        console.log('Signup response:', response.data);
+        setMessage(response.data.message || 'Signup successful');
+
+        if (response.data.message === 'Signup successful' || response.status === 200) {
+            navigate('/login');
+        }
+    } else {
+        setMessage(errorMessage);
+    }};
+
 
     return (
         <div className="signup-container">

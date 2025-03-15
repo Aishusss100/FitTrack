@@ -11,35 +11,43 @@ const Exercise = () => {
 
     const handleSetTarget = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/set_target', { target_reps: targetReps });
+            let response = await axios.post('http://localhost:5000/api/set_target', { target_reps: targetReps });
+            if (!response || response.status !== 200) {
+                response = await axios.post('http://192.168.220.149:5000/api/set_target', { target_reps: targetReps });
+            }
             console.log(response.data);
-            setBackgroundColor('#ffcccc');  // Change background color when target is set
+            setBackgroundColor('#ffcccc');
         } catch (error) {
             console.error(error);
         }
     };
-
+    
     const handleStart = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/start');
+            let response = await axios.post('http://localhost:5000/api/start');
+            if (!response || response.status !== 200) {
+                response = await axios.post('http://192.168.220.149:5000/api/start');
+            }
             console.log(response.data);
-            setTracking(true);  // Ensure tracking is set to true after the start API call
+            setTracking(true);
         } catch (error) {
             console.error(error);
         }
     };
-
+    
     const handleStop = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/stop');
+            let response = await axios.post('http://localhost:5000/api/stop');
+            if (!response || response.status !== 200) {
+                response = await axios.post('http://192.168.220.149:5000/api/stop');
+            }
             console.log(response.data);
-            setTracking(false);  // Ensure tracking is set to false after the stop API call
-            window.location.reload();  // Refresh the page after stopping the exercise
+            setTracking(false);
+            window.location.reload();
         } catch (error) {
             console.error(error);
         }
     };
-
     return (
         <div className="exercise-container" style={{ backgroundColor: backgroundColor }}>
             <h1>{exercise} Exercise</h1>

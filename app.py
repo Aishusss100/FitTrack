@@ -7,7 +7,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000','http://192.168.220.149:3000','http://192.168.220.67:3000'])
 app.secret_key = 'your_secret_key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Helps with CORS issues
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
@@ -330,4 +330,4 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
