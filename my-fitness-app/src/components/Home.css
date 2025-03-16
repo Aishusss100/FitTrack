@@ -1,66 +1,124 @@
-/* src/components/Home.css */
+/* General container styling */
 .home-container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 1100px; 
+    margin: 150px auto 50px; /* Ensures proper spacing below the title bar */
+    padding: 30px;
+    background: linear-gradient(135deg, #4a002a, #d62839); /* Maroon gradient */
+    border-radius: 25px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
     text-align: center;
-}
-
-h2 {
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.exercise-selection {
-    margin-bottom: 20px;
-}
-
-button {
-    padding: 10px;
-    margin: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007BFF;
     color: white;
-    font-size: 16px;
+}
+
+/* Header styling */
+h2 {
+    color: #fff;
+    margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 34px; 
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+/* Grid layout with exactly three columns */
+.exercise-selection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Ensures exactly 3 columns */
+    gap: 25px; /* Space between the tiles */
+    padding: 20px;
+}
+
+/* Exercise tile styling */
+.exercise-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(145deg, #ffffff, #f1f3f5); 
+    height: 170px; /* Uniform height */
+    border-radius: 20px;
+    border: 2px solid #e1e1e1;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); 
     cursor: pointer;
+    text-decoration: none;
+    color: #444;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-button:hover {
-    background-color: #0056b3;
+.exercise-tile:hover {
+    transform: translateY(-5px) scale(1.03); 
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3); 
 }
 
+/* Icon styling */
+.exercise-tile .icon {
+    font-size: 40px; 
+    margin-bottom: 10px;
+    color: #4a90e2;
+}
+
+/* Label styling */
+.exercise-tile .label {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    color: #666;
+}
+
+/* Chatbot button */
 .chatbot-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #780000; /* Maroon color */
+    background-color: #4a002a;
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
+    padding: 12px 24px;
+    border-radius: 25px;
     cursor: pointer;
-    font-family: 'Arial', sans-serif;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .chatbot-button:hover {
-    background-color: #9d0e0e; /* Darker shade of maroon on hover */
+    background-color: #8b0038;
+    transform: scale(1.1);
 }
 
+/* Chatbot window */
 .chatbot-window {
     position: fixed;
-    bottom: 70px; /* Space above the chatbot button */
+    bottom: 70px;
     right: 20px;
-    width: 300px;
-    height: 400px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    width: 320px;
+    height: 420px;
+    background-color: #fff;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
     overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .exercise-selection {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for smaller screens */
+    }
+
+    .exercise-tile {
+        height: 150px; /* Smaller tiles for smaller screens */
+    }
+
+    .exercise-tile .icon {
+        font-size: 32px;
+    }
+
+    .exercise-tile .label {
+        font-size: 14px;
+    }
+
+    .chatbot-window {
+        width: 280px;
+        height: 400px;
+    }
 }

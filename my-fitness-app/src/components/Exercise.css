@@ -1,43 +1,122 @@
+/* Container for the entire page */
 .exercise-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    background-color: #fff;
-    transition: background-color 0.3s ease;
+    background: #fff; /* Default background color */
+    transition: background-color 0.5s ease; /* Smooth transition for background color */
+    min-height: 100vh; /* Full page height */
+    font-family: 'Poppins', sans-serif; /* Modern font for style */
 }
 
+/* Background color when target is set */
+.target-set {
+    background: linear-gradient(135deg, #d1f4e8, #b8e8d3); /* Light green gradient */
+    transition: background-color 0.5s ease; /* Smooth transition */
+}
+
+/* Instructions box styling */
 .instructions {
     width: 100%;
     max-width: 600px;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #7e5959, #aa6f6f); /* Subtle gradient */
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    color: #fff; /* White text for contrast */
 }
 
 .instructions h2 {
     margin-top: 0;
+    font-size: 24px; /* Larger font for headlines */
+    text-align: center; /* Center-align header */
+    font-weight: bold;
 }
 
 .instructions p {
     margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.5; /* Better readability */
 }
 
+/* Target input styling */
 .target-input {
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center; /* Center-align input */
 }
 
+.target-input input {
+    width: 200px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: box-shadow 0.3s ease;
+}
+
+.target-input input:focus {
+    box-shadow: 0 0 10px #7e5959; /* Glow effect on focus */
+    outline: none;
+}
+
+/* Button container styling */
 .buttons {
     display: flex;
-    gap: 10px;
+    gap: 15px; /* Increased spacing between buttons */
+    justify-content: center;
 }
 
+.buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background: #7e5959; /* Button background */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.buttons button:hover {
+    background: #aa6f6f; /* Lighter shade on hover */
+    transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.buttons button:active {
+    transform: scale(0.95); /* Click effect */
+}
+
+/* Video feed styling */
 .video-feed {
     width: 100%;
     max-width: 600px;
-    border-radius: 10px;
+    border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    border: 3px solid #7e5959; /* Add border for distinction */
+}
+
+.video-feed::after {
+    content: ""; /* Decorative border effect */
+    display: block;
+    margin-top: 10px;
+    width: 80%;
+    height: 5px;
+    background: linear-gradient(90deg, #7e5959, #aa6f6f);
+    border-radius: 10px;
+    margin: 15px auto;
+}
+
+/* Error message styling */
+.error-message {
+    color: red;
+    background-color: #ffe0e0;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
 }
