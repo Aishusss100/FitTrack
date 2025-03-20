@@ -12,7 +12,7 @@
   gap: 10px; /* Spacing between buttons */
 }
 
-button {
+button, .sidebar-button {
   padding: 8px 15px;
   border: none;
   border-radius: 5px;
@@ -22,9 +22,14 @@ button {
   font-size: 1rem;
   transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition for hover effects */
 }
-
-button:hover {
+ 
+button:hover, .sidebar-button:hover {
   background-color: #aa2020; /* Slightly lighter maroon on hover */
   transform: scale(1.05); /* Slight zoom effect on hover */
 }
 
+button:disabled, .sidebar-button:disabled {
+  background-color: #ccc; /* Gray for disabled state */
+  cursor: not-allowed;
+  transform: none; /* No transform effect when disabled */
+}

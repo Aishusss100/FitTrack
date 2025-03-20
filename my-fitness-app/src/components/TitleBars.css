@@ -1,51 +1,65 @@
-.TitleBar {
-    background-color: rgb(45, 4, 4); /* Maroon color */
-    width: 100%; /* Full width */
-    height: 50px; /* Set specific height */
-    color: white;
-    text-align: center;
-    position: fixed;
-    top: 0; /* Fixed position at the top */
-    left: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
-    border-bottom-left-radius: 15px; /* Rounded edges at the bottom */
-    border-bottom-right-radius: 15px; /* Rounded edges at the bottom */
-    font-family: 'Arial', sans-serif; /* Elegant font */
-    font-size: 18px; /* Font size for better visibility */
-    background: linear-gradient(135deg, rgb(59, 1, 1), #9d0e0e); /* Add a glazing effect */
-    display: flex;
-    align-items: center; /* Center content vertically */
-    justify-content: space-between; /* Space between the title and button */
-    padding: 0 20px; /* Add padding to the sides */
-    z-index: 1000; /* Ensure it stays on top */
+.TitleBar {     
+    background-color: rgb(45, 4, 4); /* Maroon color */     
+    width: 100%; /* Full width */     
+    height: 50px; /* Set specific height */     
+    color: white !important; /* Force text color to be white */     
+    text-align: center;     
+    position: fixed;     
+    top: 0; /* Fixed position at the top */     
+    left: 0;     
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */     
+    border-bottom-left-radius: 15px; /* Rounded edges at the bottom */     
+    border-bottom-right-radius: 15px; /* Rounded edges at the bottom */     
+    font-family: 'Arial', sans-serif; /* Elegant font */     
+    font-size: 18px; /* Font size for better visibility */     
+    background: linear-gradient(135deg, rgb(59, 1, 1), #9d0e0e); /* Add a glazing effect */     
+    display: flex;     
+    align-items: center; /* Center content vertically */     
+    justify-content: space-between; /* Space between the title and button */     
+    padding: 0 20px; /* Add padding to the sides */     
+    z-index: 1000; /* Ensure it stays on top */ 
 }
 
-.button-group {
-    display: flex;
-    gap: 10px; /* Add space between buttons */
-    margin-left: 15px; /* Move the buttons slightly to the right */
+.TitleBar h1, 
+.TitleBar button, 
+.TitleBar .button-group button { 
+    color: white !important; /* Force white text across all children */ 
 }
 
-.logout-button, .profile-button, .home-button {
-    background-color: rgb(59, 1, 1); /* Slightly darker maroon color */
-    color: white;
-    border: none;
-    padding: 8px 12px; /* Adjusted padding for consistent size */
-    border-radius: 15px; /* Rounded corners */
-    cursor: pointer;
-    font-family: 'Arial', sans-serif;
+/* Button Group Styling */
+.button-group {     
+    display: flex;     
+    gap: 10px; /* Add space between buttons */     
+    margin-left: 15px; /* Move the buttons slightly to the right */ 
+}
+
+/* General button styling for profile, logout, and sidebar */
+.sidebar-button {
+    background-color: rgb(59, 1, 1); /* Same maroon color as buttons */
+    color: white; /* Ensure text remains white */
+    border: none; /* No border */
+    padding: 8px 12px; /* Match padding with other buttons */
+    border-radius: 15px; /* Rounded corners for consistency */
+    cursor: pointer; /* Pointer cursor for clickability */
+    font-family: 'Arial', sans-serif; /* Same font as other buttons */
     font-size: 14px; /* Standard font size */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    display: flex; /* Align content properly */
+    align-items: center; /* Center-align icon vertically */
+    justify-content: center; /* Center-align icon horizontally */
+    width: auto; /* Automatically adjust button width */
+    height: auto; /* Automatically adjust button height */
 }
 
-.logout-button:hover, .profile-button:hover, .home-button:hover {
-    background-color: #9d0e0e; /* Slightly lighter maroon on hover */
-    transform: scale(1.05); /* Slight hover zoom effect */
+.logout-button:hover, .profile-button:hover, .home-button:hover, .sidebar-button:hover {     
+    background-color: #9d0e0e; /* Slightly lighter maroon on hover */     
+    transform: scale(1.05); /* Slight hover zoom effect */ 
 }
 
-.logout-button:disabled {
-    background-color: #ccc; /* Gray background for disabled state */
-    cursor: not-allowed;
-    box-shadow: none; /* Remove shadow for disabled button */
+/* Disabled Button State */
+.logout-button:disabled, .sidebar-button:disabled {     
+    background-color: #ccc; /* Gray background for disabled state */     
+    cursor: not-allowed;     
+    box-shadow: none; /* Remove shadow for disabled button */ 
 }

@@ -1,0 +1,113 @@
+/* Progress Page Container */
+.progress-page {
+    padding: 20px;
+    padding-top: 100px; /* Space for title bar */
+    font-family: 'Poppins', sans-serif; /* Modern font */
+    background: linear-gradient(135deg, #f9f9f9, #e8e8e8); /* Soft gradient background */
+    min-height: 100vh;
+}
+
+/* Title */
+h1 {
+    text-align: center;
+    color: #2c3e50; /* Sophisticated dark gray */
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-transform: uppercase; /* Modern uppercase style */
+    letter-spacing: 1.5px; /* Add spacing for elegance */
+}
+
+/* Exercise Selector and Date Picker */
+.exercise-selector,
+.date-picker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px; /* Space between label and input */
+}
+
+label {
+    font-size: 16px;
+    color: #34495e; /* Dark gray for labels */
+    font-weight: bold; /* Emphasize the labels */
+}
+
+select,
+input {
+    padding: 10px;
+    font-size: 16px;
+    color: #34495e;
+    border: 2px solid #bdc3c7; /* Subtle border */
+    border-radius: 8px; /* Smooth, rounded edges */
+    background: #ecf0f1; /* Light gray background */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+}
+
+select:hover,
+input:hover {
+    border-color: #2980b9; /* Blue hover effect */
+    box-shadow: 0 0 10px rgba(41, 128, 185, 0.2); /* Subtle hover shadow */
+}
+
+/* Loading and Error Messages */
+.loading-message,
+.error-message {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 18px;
+    color: #e74c3c; /* Gentle red for errors */
+}
+
+.loading-message {
+    color: #3498db; /* Calming blue for loading */
+}
+
+/* Progress List Container */
+.progress-list {
+    display: flex;
+    flex-wrap: wrap; /* Wrap items for smaller screens */
+    justify-content: center;
+    gap: 20px; /* Space between progress items */
+    margin-top: 30px;
+}
+
+/* Progress Item Cards */
+.progress-item {
+    background: #ffffff; /* Clean white background */
+    border: 1px solid #dcdde1; /* Light border for definition */
+    border-radius: 12px; /* Rounded corners for a modern look */
+    padding: 20px;
+    width: 280px; /* Fixed width for uniformity */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Hover effect */
+}
+
+.progress-item:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+}
+
+.progress-item h3 {
+    margin-bottom: 10px;
+    color: #2c3e50; /* Dark gray */
+    font-size: 18px;
+    text-transform: capitalize; /* Clean and consistent text */
+}
+
+.progress-item p {
+    margin: 5px 0;
+    color: #7f8c8d; /* Soft gray for secondary text */
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .progress-item {
+        width: 90%; /* Full width on smaller screens */
+    }
+
+    h1 {
+        font-size: 24px; /* Adjust title size for smaller screens */
+    }
+}

@@ -1,70 +1,102 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import './Exercise.css';
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import "./Exercise.css";
 
 const Exercise = () => {
     const { exercise } = useParams();
-    const DEFAULT_BACKGROUND_COLOR = '#fff'; // Default background color
-    const TARGET_SET_COLOR = '#d1f4e8'; // Background color when target is set
+    const DEFAULT_BACKGROUND_COLOR = "#fff";
+    const TRACKING_BACKGROUND_COLOR = "#f5e1a4";
+    const TARGET_SET_COLOR = "#d1f4e8";
 
     const [targetReps, setTargetReps] = useState(0);
     const [tracking, setTracking] = useState(false);
     const [backgroundColor, setBackgroundColor] = useState(DEFAULT_BACKGROUND_COLOR);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState("");
+    const [elapsedTime, setElapsedTime] = useState(0);
+    const [timerId, setTimerId] = useState(null);
 
-    // Format exercise title for better readability
     const formatExerciseTitle = (exercise) => {
-        return exercise.replace(/_/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+        return exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
     };
 
     const handleSetTarget = async () => {
         if (targetReps <= 0) {
-            setErrorMessage('Please enter a valid number of target repetitions.');
+            setErrorMessage("Please enter a valid number of target repetitions.");
             return;
         }
         try {
-            const response = await axios.post('http://localhost:5000/api/set_target', {
-                target_reps: targetReps,
-                exercise: exercise // Include exercise in the payload
-            });
-            console.log(response.data);
-            setBackgroundColor(TARGET_SET_COLOR); // Change background color when target is set
-            setErrorMessage(''); // Clear any previous error
+            await axios.post(
+                "http://localhost:5000/api/set_target",
+                {
+                    target_reps: targetReps,
+                    exercise,
+                },
+                { withCredentials: true }
+            );
+            setBackgroundColor(TARGET_SET_COLOR);
+            setErrorMessage("");
         } catch (error) {
             console.error(error);
-            setErrorMessage('Failed to set target repetitions. Please try again.');
+            setErrorMessage("Failed to set target repetitions. Please try again.");
         }
     };
 
     const handleStart = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/start', { exercise });
-            console.log(response.data);
-            setTracking(true); // Ensure tracking is set to true after the start API call
+            await axios.post(
+                "http://localhost:5000/api/start",
+                { exercise },
+                { withCredentials: true }
+            );
+            setTracking(true);
+            setElapsedTime(0);
+            setBackgroundColor(TRACKING_BACKGROUND_COLOR);
+
+            const intervalId = setInterval(() => {
+                setElapsedTime((prevTime) => prevTime + 1);
+            }, 1000);
+
+            setTimerId(intervalId);
         } catch (error) {
             console.error(error);
-            setErrorMessage('Failed to start exercise tracking. Please try again.');
+            setErrorMessage("Failed to start exercise tracking. Please try again.");
         }
     };
 
     const handleStop = async () => {
-        if (!window.confirm('Are you sure you want to stop this exercise?')) return; // Confirm before stopping
+        if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
         try {
-            const response = await axios.post('http://localhost:5000/api/stop');
-            console.log(response.data);
-            setTracking(false); // Ensure tracking is set to false
-            setBackgroundColor(DEFAULT_BACKGROUND_COLOR); // Reset background color
-            window.location.reload(); // Refresh the page after stopping the exercise
+            await axios.post(
+                "http://localhost:5000/api/stop",
+                {
+                    exercise_name: exercise,
+                    duration: elapsedTime,
+                    reps: targetReps || 0,
+                },
+                { withCredentials: true }
+            );
+            setTracking(false);
+            clearInterval(timerId);
+            setTimerId(null);
+            setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
+            setElapsedTime(0);
+            window.location.reload();
         } catch (error) {
             console.error(error);
-            setErrorMessage('Failed to stop exercise tracking. Please try again.');
+            setErrorMessage("Failed to stop exercise tracking. Please try again.");
         }
     };
 
+    const formatTime = (timeInSeconds) => {
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = timeInSeconds % 60;
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    };
+
     return (
-        <div className="exercise-container" style={{ backgroundColor: backgroundColor }}>
+        <div className="exercise-container" style={{ backgroundColor }}>
             <h1>{formatExerciseTitle(exercise)} Exercise</h1>
 
             <div className="instructions">
@@ -85,21 +117,30 @@ const Exercise = () => {
                 <button onClick={handleSetTarget}>Set Target</button>
             </div>
 
-            {/* Display error messages */}
             {errorMessage && <div className="error-message">{errorMessage}</div>}
 
             <div className="buttons">
-                <button onClick={handleStart}>Start</button>
-                <button onClick={handleStop}>Stop</button>
+                <button onClick={handleStart} disabled={tracking}>
+                    Start
+                </button>
+                <button onClick={handleStop} disabled={!tracking}>
+                    Stop
+                </button>
+            </div>
+
+            <div className="stopwatch">
+                <h2>Time: {formatTime(elapsedTime)}</h2>
             </div>
 
             {tracking && (
-                <div className="video-feed">
-                    <h2>Video Feed</h2>
-                    <img
-                        src={`http://localhost:5000/api/video_feed?exercise=${exercise}`}
-                        alt="Video Feed"
-                    />
+                <div className="video-and-angle">
+                    <div className="video-feed">
+                        <h2>Video Feed</h2>
+                        <img
+                            src={`http://localhost:5000/api/video_feed?exercise=${exercise}`}
+                            alt="Video Feed"
+                        />
+                    </div>
                 </div>
             )}
         </div>

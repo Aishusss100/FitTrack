@@ -120,3 +120,70 @@
     text-align: center;
     font-size: 14px;
 }
+/* Stopwatch styling */
+
+.stopwatch {
+    text-align: center; /* Center the text */
+    font-size: 10px; /* Smaller font size for compactness */
+    margin: 8px 0; /* Reduced vertical spacing */
+    color: #ffffff; /* White text for contrast */
+    background-color: #4f1e03; /* Brownish background for visibility */
+    padding: 3px 8px; /* Very small padding for a slimmer box */
+    border-radius: 4px; /* Slightly less rounded corners */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    width: 40%; /* Narrower width for a compact layout */
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: bold; /* Bold text for readability */
+    line-height: 1; /* Tighter line spacing */
+}
+
+/* Container for Video Feed and Angle Box */
+.video-and-angle {
+    display: flex; /* Align video feed and angle box side-by-side */
+    gap: 20px; /* Space between the video feed and angle box */
+    width: 100%;
+    justify-content: center; /* Center align the container */
+}
+
+/* Angle Box Styling */
+.angle-box {
+    width: 30%; /* Adjust width for balance */
+    background: linear-gradient(135deg, #f7e5e5, #f2d1d1); /* Light red gradient */
+    border: 2px solid #7e5959; /* Add a border for distinction */
+    border-radius: 15px; /* Rounded corners for smooth look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Depth shadow */
+    padding: 20px;
+    text-align: center; /* Center-align text */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Angle Title Styling */
+.angle-box h2 {
+    margin: 0;
+    font-size: 24px; /* Slightly larger for prominence */
+    color: #333; /* Dark text color */
+}
+
+/* Angle Value Styling */
+.angle-box p {
+    margin: 10px 0 0; /* Space above the value */
+    font-size: 36px; /* Large font for angle */
+    font-weight: bold;
+    color: #7e5959; /* Use a consistent color theme */
+}
+
+/* Enhance spacing for smaller screens */
+@media (max-width: 768px) {
+    .video-and-angle {
+        flex-direction: column; /* Stack video feed and angle box vertically */
+    }
+    .angle-box {
+        width: 100%; /* Use full width for smaller devices */
+    }
+}
+
+

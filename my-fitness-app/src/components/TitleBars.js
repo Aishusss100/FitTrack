@@ -1,92 +1,111 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import './TitleBars.css';
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import "./TitleBars.css";
 
-function TitleBarHome() {
-    const navigate = useNavigate();
+// Home Title Bar
+function TitleBarHome({ toggleSidebar }) {
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        navigate('/login');
-    };
+  const handleLogout = () => navigate("/login");
+  const goToProfile = () => navigate("/profile");
 
-    const goToProfile = () => {
-        navigate('/profile'); // Navigate to the Profile page
-    };
-
-    return (
-        <header className="TitleBar">
-            <h1>FitTrack</h1>
-            <div className="button-group">
-                <button className="profile-button" onClick={goToProfile}>Profile</button>
-                <button className="logout-button" onClick={handleLogout}>Logout</button>
-            </div>
-        </header>
-    );
+  return (
+    <header className="TitleBar">
+      <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
+      <h1>FitTrack</h1>
+      <div className="button-group">
+        <button className="profile-button" onClick={goToProfile}>Profile</button>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </header>
+  );
 }
 
-function TitleBarExercise() {
-    const navigate = useNavigate();
+// Exercise Title Bar
+function TitleBarExercise({ toggleSidebar }) {
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        navigate('/login');
-    };
+  const handleLogout = () => navigate("/login");
+  const goToHome = () => navigate("/home");
 
-    const goToHome = () => {
-        navigate('/home'); // Navigate to the Home page
-    };
-
-    return (
-        <header className="TitleBar">
-            <h1>FitTrack</h1>
-            <div className="button-group">
-                <button className="home-button" onClick={goToHome}>Home</button>
-                <button className="logout-button" onClick={handleLogout}>Logout</button>
-            </div>
-        </header>
-    );
+  return (
+    <header className="TitleBar">
+      <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
+      <h1>FitTrack</h1>
+      <div className="button-group">
+        <button className="home-button" onClick={goToHome}>Home</button>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </header>
+  );
 }
 
-function TitleBarProfile() {
-    const navigate = useNavigate();
+// Profile Title Bar
+function TitleBarProfile({ toggleSidebar }) {
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        navigate('/login');
-    };
+  const handleLogout = () => navigate("/login");
+  const goToHome = () => navigate("/home");
 
-    const goToHome = () => {
-        navigate('/home'); // Navigate back to Home page
-    };
-
-    return (
-        <header className="TitleBar">
-            <h1>Profile</h1>
-            <div className="button-group">
-                <button className="home-button" onClick={goToHome}>Home</button>
-                <button className="logout-button" onClick={handleLogout}>Logout</button>
-            </div>
-        </header>
-    );
+  return (
+    <header className="TitleBar">
+      <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
+      <h1>Profile</h1>
+      <div className="button-group">
+        <button className="home-button" onClick={goToHome}>Home</button>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </header>
+  );
 }
 
+// Progress Title Bar
+function TitleBarProgress({ toggleSidebar }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => navigate("/login");
+  const goToHome = () => navigate("/home");
+
+  return (
+    <header className="TitleBar">
+      <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
+      <h1>Progress</h1>
+      <div className="button-group">
+        <button className="home-button" onClick={goToHome}>Home</button>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </header>
+  );
+}
+
+// Login Title Bar
 function TitleBarLogin() {
-    return <header className="TitleBar"><h1>FitTrack</h1></header>;
+  return (
+    <header className="TitleBar">
+      <h1>FitTrack</h1>
+    </header>
+  );
 }
 
-function TitleBars() {
-    const location = useLocation();
-    const pathname = location.pathname;
+// Main TitleBars Component (Router-based)
+function TitleBars({ toggleSidebar }) {
+  const location = useLocation();
+  const pathname = location.pathname;
 
-    if (pathname === '/home') {
-        return <TitleBarHome />;
-    } else if (pathname.startsWith('/exercise')) {
-        return <TitleBarExercise />;
-    } else if (pathname === '/profile') {
-        return <TitleBarProfile />;
-    } else if (pathname === '/login') {
-        return <TitleBarLogin />;
-    } else {
-        return null; // No title bar for signup and any other routes
-    }
+  switch (true) {
+    case pathname === "/home":
+      return <TitleBarHome toggleSidebar={toggleSidebar} />;
+    case pathname.startsWith("/exercise"):
+      return <TitleBarExercise toggleSidebar={toggleSidebar} />;
+    case pathname === "/profile":
+      return <TitleBarProfile toggleSidebar={toggleSidebar} />;
+    case pathname === "/progress":
+      return <TitleBarProgress toggleSidebar={toggleSidebar} />;
+    case pathname === "/login":
+      return <TitleBarLogin />;
+    default:
+      return null;
+  }
 }
 
 export default TitleBars;

@@ -1,12 +1,22 @@
 import sqlite3
 
-conn = sqlite3.connect('users.db')
-c = conn.cursor()
+def fetch_progress_data():
+    conn = sqlite3.connect('exercise_progress_with_duration.db')
+    cursor = conn.cursor()
 
-c.execute("PRAGMA table_info(users)")
-columns = c.fetchall()
+    query = """
+    SELECT * FROM exercise_progress_with_duration
+    WHERE username = 'admin' AND date = '2025-03-19';
+    """
+    cursor.execute(query)
 
-for column in columns:
-    print(column)
+    rows = cursor.fetchall()
+    conn.close()
 
-conn.close()
+    if rows:
+        for row in rows:
+            print(row)
+    else:
+        print("No data found for the specified username and date.")
+
+fetch_progress_data()

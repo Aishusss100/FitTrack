@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import pyttsx3
-
+import requests
 # Initialize MediaPipe
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -32,6 +32,10 @@ exercise_started = False
 target_reps = 0
 target_achieved = False
 cap = None
+# Define a global username variable
+username = "default_user"  # This can be set via a function later if needed
+
+
 
 
 def init_exercise_tracker():
@@ -50,15 +54,21 @@ def get_exercise_data():
     """Return the current exercise data"""
     return exercises
 
-def change_exercise(exercise):
-    """Change the current exercise"""
+def change_exercise(exercise_name):
+    """Change the current exercise."""
     global current_exercise
-    if exercise in exercises:
-        current_exercise = exercise
-        exercises[current_exercise]['stage'] = None
-        return {'success': True}
-    else:
-        return {'success': False}
+
+    # Validate if the exercise exists
+    if exercise_name not in exercises:
+        print(f"Invalid exercise: {exercise_name}")
+        return {'success': False, 'message': 'Exercise not found'}
+
+    current_exercise = exercise_name  # Set the current exercise
+    print(f"Current exercise changed to: {current_exercise}")
+
+    # Reset the stage for the selected exercise
+    exercises[current_exercise]['stage'] = None
+    return {'success': True, 'message': f'Exercise changed to {current_exercise}'}
 
 def set_target_reps(reps):
     """Set the target number of repetitions"""
@@ -68,35 +78,88 @@ def set_target_reps(reps):
     target_achieved = False
     return {'target_reps': target_reps}
 
-def start_exercise():
-    """Start the exercise tracking"""
-    global exercise_started, exercises, target_achieved, cap
+import requests
+# Fetch username dynamically from the backend
+def fetch_username():
+    url = "http://localhost:5000/api/get_username"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json().get('username', None)
+        else:
+            print(f"Failed to fetch username: {response.text}")
+            return None
+    except Exception as e:
+        print(f"Error fetching username: {e}")
+        return None
     
+
+# Define the backend API endpoint for updating progress
+API_URL = "http://localhost:5000/api/update_progress"
+
+def update_progress_api(exercise_name, reps):
+    # Fetch the username dynamically
+    username = fetch_username()
+    if not username:
+        print("No user is logged in. Cannot update progress.")
+        return
+
+    payload = {
+        "username": username,
+        "exercise_name": exercise_name,
+        "reps": reps
+    }
+    try:
+        response = requests.post(API_URL, json=payload)
+        if response.status_code == 200:
+            print(f"Progress updated: {exercise_name} - {reps} reps")
+        else:
+            print(f"Failed to update progress: {response.text}")
+    except Exception as e:
+        print(f"Error updating progress: {e}")
+
+
+def start_exercise(exercise_name):
+    """Start the exercise tracking and set the current exercise."""
+    global exercise_started, target_achieved, current_exercise, exercises, cap  # Include cap here
+
     exercise_started = True
     target_achieved = False
-    
+    current_exercise = exercise_name  # Set the current exercise
+    print(f"Current exercise set to: {current_exercise}")
+
+    # Reset counters for all exercises
     for exercise in exercises.values():
-        exercise['counter'] = 0  # Reset counters on start
-    
-    # Reinitialize video capture
-    if cap is None or not cap.isOpened():
-        cap = cv2.VideoCapture(0)
-    
-    return {'success': True}
+        exercise['counter'] = 0
+        exercise['stage'] = None
+
+    # Ensure proper initialization of video capture
+    if cap is None:
+        cap = cv2.VideoCapture(0)  # Initialize cap
+    elif not cap.isOpened():
+        cap.open(0)  # Open cap if it is closed
+
+    return {'success': True, 'message': f'{current_exercise} started'}
 
 def stop_exercise():
     """Stop the exercise tracking"""
-    global exercise_started, cap,target_achieved
+    global exercise_started, cap, target_achieved, current_exercise, exercises
     
     exercise_started = False
-    target_achieved = False   # Ensure this is reset
-
+    target_achieved = False
+    
+    # Get the current exercise data before stopping
+    exercise_data = {
+        'exercise_name': current_exercise,
+        'reps': exercises[current_exercise]['counter']
+    }
+    
     # Release video capture
     if cap is not None and cap.isOpened():
         cap.release()
         cap = None
     
-    return {'success': True}
+    return {'success': True, 'exercise_data': exercise_data}
 
 def calculate_angle(a, b, c):
     """Calculate the angle between three points"""
@@ -211,11 +274,11 @@ def generate_video_frames():
 # New exercise processing functions can be defined below
 def process_bicep_curl(landmarks, side):
     """Logic for bicep curls (left/right)"""
-    global exercises, target_reps, target_achieved
+    global exercises, target_reps, target_achieved, username
     exercise_key = f'bicep_curl_{side.lower()}'
     if current_exercise != exercise_key:
         return
-    
+    shoulder, elbow, wrist = None, None, None
     if side == 'LEFT':
         shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
@@ -240,6 +303,9 @@ def process_bicep_curl(landmarks, side):
         exercises[f'bicep_curl_{side.lower()}']['stage'] = "up"
         exercises[f'bicep_curl_{side.lower()}']['counter'] += 1
 
+        # Send progress update to the backend
+        #update_progress_api(exercise_key, 1)
+
         if exercises[f'bicep_curl_{side.lower()}']['counter'] >= target_reps > 0:
             if not target_achieved:  # Only trigger when target_achieved is False
                 target_achieved = True
@@ -247,8 +313,11 @@ def process_bicep_curl(landmarks, side):
 
 def process_overhead_press(landmarks, side):
     """Logic for overhead presses (left/right)"""
-    global exercises, target_reps, target_achieved
-
+    global exercises, target_reps, target_achieved, username
+    exercise_key = f'overhead_press_{side.lower()}'
+    if current_exercise != exercise_key:
+        return
+    shoulder, elbow, wrist = None, None, None
     if side == 'LEFT':
         elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
                  landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
@@ -267,11 +336,14 @@ def process_overhead_press(landmarks, side):
     angle = calculate_angle(elbow, shoulder, wrist)
 
     # Overhead press logic
-    if angle < 70:
+    if angle < 80:
         exercises[f'overhead_press_{side.lower()}']['stage'] = "down"
-    if angle > 160 and exercises[f'overhead_press_{side.lower()}']['stage'] == "down":
+    if angle > 165 and exercises[f'overhead_press_{side.lower()}']['stage'] == "down":
         exercises[f'overhead_press_{side.lower()}']['stage'] = "up"
         exercises[f'overhead_press_{side.lower()}']['counter'] += 1
+
+        # Send progress update to the backend
+        #update_progress_api(exercise_key, 1)
 
         if exercises[f'overhead_press_{side.lower()}']['counter'] >= target_reps > 0:
             if not target_achieved:  # Only trigger when target_achieved is False
@@ -280,31 +352,38 @@ def process_overhead_press(landmarks, side):
 
 def process_lateral_raise(landmarks, side):
     """Logic for lateral raises (left/right)"""
-    global exercises, target_reps, target_achieved
-
+    global exercises, target_reps, target_achieved, username
+    exercise_key = f'lateral_raise_{side.lower()}'
+    if current_exercise != exercise_key:
+        return
+    shoulder, waist, wrist = None, None, None
+    # Extract landmarks for the selected side
     if side == 'LEFT':
         shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-        elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                 landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+        waist = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                 landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
         wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
     elif side == 'RIGHT':
         shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-        elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
-                 landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+        waist = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
         wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
 
-    angle = calculate_angle(shoulder, elbow, wrist)
+    angle = calculate_angle(shoulder,waist, wrist)
 
     # Lateral raise logic
     if angle < 30:
         exercises[f'lateral_raise_{side.lower()}']['stage'] = "down"
-    if angle > 90 and exercises[f'lateral_raise_{side.lower()}']['stage'] == "down":
+    if angle > 80 and exercises[f'lateral_raise_{side.lower()}']['stage'] == "down":
         exercises[f'lateral_raise_{side.lower()}']['stage'] = "up"
         exercises[f'lateral_raise_{side.lower()}']['counter'] += 1
+
+        # Send progress update to the backend
+        #update_progress_api(exercise_key, 1)
 
         if exercises[f'lateral_raise_{side.lower()}']['counter'] >= target_reps > 0:
             if not target_achieved:  # Only trigger when target_achieved is False
@@ -313,31 +392,38 @@ def process_lateral_raise(landmarks, side):
 
 def process_front_raise(landmarks, side):
     """Logic for front raises (left/right)"""
-    global exercises, target_reps, target_achieved
-
+    global exercises, target_reps, target_achieved, username
+    exercise_key = f'front_raise_{side.lower()}'
+    if current_exercise != exercise_key:
+        return
+    shoulder, waist, wrist = None, None, None
+    # Extract landmarks for the selected side
     if side == 'LEFT':
         shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-        elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                 landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+        waist = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                 landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
         wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
     elif side == 'RIGHT':
         shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-        elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
-                 landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+        waist = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
         wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
 
-    angle = calculate_angle(shoulder, elbow, wrist)
+    angle = calculate_angle(wrist, waist, shoulder)
 
     # Front raise logic
-    if angle < 30:
+    if angle < 20:
         exercises[f'front_raise_{side.lower()}']['stage'] = "down"
-    if angle > 90 and exercises[f'front_raise_{side.lower()}']['stage'] == "down":
+    if angle > 70 and exercises[f'front_raise_{side.lower()}']['stage'] == "down":
         exercises[f'front_raise_{side.lower()}']['stage'] = "up"
         exercises[f'front_raise_{side.lower()}']['counter'] += 1
+
+        # Send progress update to the backend
+        #update_progress_api(exercise_key, 1)
 
         if exercises[f'front_raise_{side.lower()}']['counter'] >= target_reps > 0:
             if not target_achieved:  # Only trigger when target_achieved is False
@@ -346,8 +432,11 @@ def process_front_raise(landmarks, side):
 
 def process_single_arm_dumbbell(landmarks, side):
     """Logic for single-arm dumbbell exercise (left/right)"""
-    global exercises, target_reps, target_achieved
-
+    global exercises, target_reps, target_achieved, username
+    exercise_key = f'single_arm_dumbbell_{side.lower()}'
+    if current_exercise != exercise_key:
+        return
+    shoulder, elbow, wrist = None, None, None
     if side == 'LEFT':
         shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
@@ -371,6 +460,9 @@ def process_single_arm_dumbbell(landmarks, side):
     if angle < 30 and exercises[f'single_arm_dumbbell_{side.lower()}']['stage'] == "down":
         exercises[f'single_arm_dumbbell_{side.lower()}']['stage'] = "up"
         exercises[f'single_arm_dumbbell_{side.lower()}']['counter'] += 1
+
+        # Send progress update to the backend
+        #update_progress_api(exercise_key, 1)
 
         print(f"{side} Arm Dumbbell Count: {exercises[f'single_arm_dumbbell_{side.lower()}']['counter']}")
 
