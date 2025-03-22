@@ -1,10 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./TitleBars.css";
 
-// Home Title Bar
+// Home Title Bar with Streak Display
 function TitleBarHome({ toggleSidebar }) {
   const navigate = useNavigate();
+  const [streak, setStreak] = useState(0); // State to store streak count
+
+  useEffect(() => {
+    // Fetch streak count from the backend
+    const fetchStreak = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/get_streak", {
+          withCredentials: true, // Include session credentials
+        });
+        setStreak(response.data.streak); // Update streak count
+      } catch (error) {
+        console.error("Error fetching streak:", error);
+      }
+    };
+
+    fetchStreak();
+  }, []);
 
   const handleLogout = () => navigate("/login");
   const goToProfile = () => navigate("/profile");
@@ -14,12 +32,21 @@ function TitleBarHome({ toggleSidebar }) {
       <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
       <h1>FitTrack</h1>
       <div className="button-group">
-        <button className="profile-button" onClick={goToProfile}>Profile</button>
+        <button className="profile-button" onClick={goToProfile}>
+          <i className="fas fa-user"></i> Profile
+        </button>
+        {streak > 0 && (
+          <div className="streak-display">
+            <span className="streak-icon">🔥</span>
+            <span className="streak-count">{streak}</span>
+          </div>
+        )}
         <button className="logout-button" onClick={handleLogout}>Logout</button>
       </div>
     </header>
   );
 }
+
 
 // Exercise Title Bar
 function TitleBarExercise({ toggleSidebar }) {

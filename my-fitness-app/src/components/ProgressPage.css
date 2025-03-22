@@ -1,20 +1,25 @@
 /* Progress Page Container */
 .progress-page {
-    padding: 20px;
-    padding-top: 100px; /* Space for title bar */
-    font-family: 'Poppins', sans-serif; /* Modern font */
-    background: linear-gradient(135deg, #f9f9f9, #e8e8e8); /* Soft gradient background */
+    display: flex; /* Align items in a flex container */
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center; /* Center contents vertically */
+    align-items: center; /* Center contents horizontally */
+    padding: 40px 20px;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ffe6e6, #ffcccc); /* Soft pastel maroon theme */
     min-height: 100vh;
+    animation: fadeIn 1s ease-in-out; /* Smooth fade-in animation */
 }
 
 /* Title */
 h1 {
     text-align: center;
-    color: #2c3e50; /* Sophisticated dark gray */
-    font-size: 32px;
-    margin-bottom: 20px;
-    text-transform: uppercase; /* Modern uppercase style */
-    letter-spacing: 1.5px; /* Add spacing for elegance */
+    color: #4a002a; /* Rich maroon */
+    font-size: 36px; /* Larger font size for emphasis */
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px; /* Add spacing for stylish appearance */
+    animation: slideDown 0.8s ease-out; /* Slide-down entrance animation */
 }
 
 /* Exercise Selector and Date Picker */
@@ -23,31 +28,44 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    gap: 10px; /* Space between label and input */
+    gap: 15px; /* Space between selector elements */
+    background: rgba(255, 255, 255, 0.3); /* Frosted effect for elegance */
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    margin-bottom: 30px; /* Space below */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.exercise-selector:hover,
+.date-picker:hover {
+    transform: scale(1.05); /* Slight zoom effect */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Labels */
 label {
-    font-size: 16px;
-    color: #34495e; /* Dark gray for labels */
-    font-weight: bold; /* Emphasize the labels */
+    font-size: 18px; /* Slightly larger text */
+    color: #4a002a;
+    font-weight: bold;
 }
 
+/* Input and Select Boxes */
 select,
 input {
-    padding: 10px;
+    padding: 12px;
     font-size: 16px;
-    color: #34495e;
-    border: 2px solid #bdc3c7; /* Subtle border */
-    border-radius: 8px; /* Smooth, rounded edges */
-    background: #ecf0f1; /* Light gray background */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+    color: #4a002a;
+    border: 2px solid #8b0038;
+    border-radius: 10px;
+    background: #ffeff1; /* Softer background for inputs */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 select:hover,
 input:hover {
-    border-color: #2980b9; /* Blue hover effect */
-    box-shadow: 0 0 10px rgba(41, 128, 185, 0.2); /* Subtle hover shadow */
+    border-color: #d62839; /* Bright hover color */
+    box-shadow: 0 0 15px rgba(214, 40, 57, 0.4); /* Glow effect on hover */
 }
 
 /* Loading and Error Messages */
@@ -55,59 +73,109 @@ input:hover {
 .error-message {
     text-align: center;
     margin: 20px 0;
-    font-size: 18px;
-    color: #e74c3c; /* Gentle red for errors */
+    font-size: 20px; /* Slightly larger messages */
+    color: #e74c3c;
 }
 
 .loading-message {
-    color: #3498db; /* Calming blue for loading */
+    color: #d62839;
+    font-weight: bold;
 }
 
 /* Progress List Container */
 .progress-list {
     display: flex;
-    flex-wrap: wrap; /* Wrap items for smaller screens */
-    justify-content: center;
-    gap: 20px; /* Space between progress items */
-    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center; /* Center all cards */
+    gap: 25px;
+    margin-top: 40px;
+    width: 100%;
 }
 
 /* Progress Item Cards */
 .progress-item {
-    background: #ffffff; /* Clean white background */
-    border: 1px solid #dcdde1; /* Light border for definition */
-    border-radius: 12px; /* Rounded corners for a modern look */
-    padding: 20px;
-    width: 280px; /* Fixed width for uniformity */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Hover effect */
+    background: #ffffff;
+    border: 1px solid #dcdde1;
+    border-radius: 15px;
+    padding: 25px;
+    width: 320px; /* Consistent width */
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2); /* Stronger shadow for emphasis */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
+/* Gradient highlight on top */
+.progress-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 80%;
+    height: 6px;
+    background: linear-gradient(90deg, #8b0038, #d62839);
+    transform: translateX(-50%);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+/* Hover effect */
 .progress-item:hover {
-    transform: translateY(-5px); /* Slight lift on hover */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+    transform: translateY(-10px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3); /* Lift effect on hover */
 }
 
+/* Progress Item Text */
 .progress-item h3 {
-    margin-bottom: 10px;
-    color: #2c3e50; /* Dark gray */
-    font-size: 18px;
-    text-transform: capitalize; /* Clean and consistent text */
+    margin-bottom: 12px;
+    color: #4a002a;
+    font-size: 20px; /* Larger font for emphasis */
+    font-weight: bold;
+    text-align: center;
 }
 
 .progress-item p {
-    margin: 5px 0;
-    color: #7f8c8d; /* Soft gray for secondary text */
+    margin: 6px 0;
+    color: #7f8c8d;
     font-size: 16px;
+    text-align: center; /* Center-align text */
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .progress-item {
-        width: 90%; /* Full width on smaller screens */
+        width: 90%;
     }
 
     h1 {
-        font-size: 24px; /* Adjust title size for smaller screens */
+        font-size: 28px;
+    }
+
+    .exercise-selector,
+    .date-picker {
+        flex-direction: column; /* Stack selectors vertically */
     }
 }

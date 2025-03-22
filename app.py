@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, session, redirect, url_for, Response
 from flask_cors import CORS
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
+
 from exercise_tracker import (
     init_exercise_tracker,
     get_exercise_data,
@@ -238,6 +239,9 @@ def update_progress_internal(data):
 
     return {'message': 'Progress updated successfully!', 'success': True}
 
+@app.route('/')
+def home():
+    return "Welcome to the Flask Backend!"
 
 # Progress tracking APIs
 @app.route('/api/update_progress', methods=['POST'])
@@ -284,24 +288,76 @@ def get_exercises():
     ])
 
 
+# @app.route('/api/get_progress', methods=['GET'])
+# def get_progress():
+#     username = session.get('username')
+#     if not username:
+#         return jsonify({'message': 'User not logged in'}), 401
+
+#     date_filter = request.args.get('date')
+#     exercise_name = request.args.get('exercise_name')
+
+#     conn = sqlite3.connect('exercise_progress_with_duration.db')
+#     cursor = conn.cursor()
+#     try:
+#         query = """
+#             SELECT exercise_name, reps, duration
+#             FROM exercise_progress_with_duration
+#             WHERE username = ? AND date = ? AND exercise_name = ?;
+#         """
+#         cursor.execute(query, (username, date_filter, exercise_name))
+#         rows = cursor.fetchall()
+#     except Exception as e:
+#         print(f"Error fetching progress: {e}")
+#         return jsonify({'message': 'Failed to fetch progress'}), 500
+#     finally:
+#         conn.close()
+
+#     return jsonify([
+#         {'exercise_name': row[0], 'reps': row[1], 'duration': row[2]} for row in rows
+#     ])
+
 @app.route('/api/get_progress', methods=['GET'])
 def get_progress():
     username = session.get('username')
     if not username:
         return jsonify({'message': 'User not logged in'}), 401
 
-    date_filter = request.args.get('date')
+    view_type = request.args.get('view_type')  # Accept "daily", "weekly", "monthly"
     exercise_name = request.args.get('exercise_name')
 
     conn = sqlite3.connect('exercise_progress_with_duration.db')
     cursor = conn.cursor()
+
     try:
-        query = """
-            SELECT exercise_name, reps, duration
-            FROM exercise_progress_with_duration
-            WHERE username = ? AND date = ? AND exercise_name = ?;
-        """
-        cursor.execute(query, (username, date_filter, exercise_name))
+        if view_type == "daily":
+            # Fetch progress for today
+            query = """
+                SELECT date, SUM(reps), SUM(duration)
+                FROM exercise_progress_with_duration
+                WHERE username = ? AND date = date('now') AND exercise_name = ?
+                GROUP BY date;
+            """
+            cursor.execute(query, (username, exercise_name))
+        elif view_type == "weekly":
+            # Fetch progress for the past 7 days
+            query = """
+                SELECT date, SUM(reps), SUM(duration)
+                FROM exercise_progress_with_duration
+                WHERE username = ? AND date >= date('now', '-7 days') AND exercise_name = ?
+                GROUP BY date;
+            """
+            cursor.execute(query, (username, exercise_name))
+        elif view_type == "monthly":
+            # Fetch progress for the past 30 days
+            query = """
+                SELECT date, SUM(reps), SUM(duration)
+                FROM exercise_progress_with_duration
+                WHERE username = ? AND date >= date('now', '-30 days') AND exercise_name = ?
+                GROUP BY date;
+            """
+            cursor.execute(query, (username, exercise_name))
+
         rows = cursor.fetchall()
     except Exception as e:
         print(f"Error fetching progress: {e}")
@@ -309,10 +365,50 @@ def get_progress():
     finally:
         conn.close()
 
+    # Prepare JSON response
     return jsonify([
-        {'exercise_name': row[0], 'reps': row[1], 'duration': row[2]} for row in rows
+        {'date': row[0], 'reps': row[1], 'duration': row[2]} for row in rows
     ])
 
+
+@app.route('/api/get_streak', methods=['GET'])
+def get_streak():
+    username = session.get('username')
+    if not username:
+        return jsonify({'message': 'User not logged in'}), 401
+
+    conn = sqlite3.connect('exercise_progress_with_duration.db')
+    cursor = conn.cursor()
+    
+    # Query all distinct workout dates for the user, sorted in descending order
+    cursor.execute("""
+        SELECT DISTINCT date FROM exercise_progress_with_duration
+        WHERE username = ?
+        ORDER BY date DESC
+    """, (username,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    # Calculate streak
+    streak = 0
+    previous_date = None
+    today = date.today()
+
+    for row in rows:
+        current_date = date.fromisoformat(row[0])
+        if previous_date is None:  # First date
+            if current_date == today or current_date == (today - timedelta(days=1)):
+                streak += 1
+            else:
+                break
+        else:
+            if (previous_date - current_date).days == 1:
+                streak += 1
+            else:
+                break
+        previous_date = current_date
+
+    return jsonify({'streak': streak})
 
 
 if __name__ == "__main__":

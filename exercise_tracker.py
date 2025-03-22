@@ -36,8 +36,6 @@ cap = None
 username = "default_user"  # This can be set via a function later if needed
 
 
-
-
 def init_exercise_tracker():
     """Initialize or reset the exercise tracker state"""
     global exercises, current_exercise, exercise_started, target_reps, target_achieved

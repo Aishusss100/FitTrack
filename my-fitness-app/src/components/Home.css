@@ -1,13 +1,35 @@
 /* General container styling */
 .home-container {
-    max-width: 1100px; 
-    margin: 150px auto 50px; /* Ensures proper spacing below the title bar */
+    max-width: 1100px;
+    margin: 180px auto 50px;
     padding: 30px;
-    background: linear-gradient(135deg, #4a002a, #d62839); /* Maroon gradient */
-    border-radius: 25px; 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+    background: linear-gradient(135deg, #4a002a, #a81d34);
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     text-align: center;
     color: white;
+    animation: fadeIn 1s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glowing border effect */
+.home-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 25px;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+}
+
+.home-container:hover::before {
+    opacity: 1;
 }
 
 /* Header styling */
@@ -15,16 +37,17 @@ h2 {
     color: #fff;
     margin-bottom: 40px;
     font-family: 'Poppins', sans-serif;
-    font-size: 34px; 
+    font-size: 34px;
     font-weight: 700;
     letter-spacing: 2px;
+    animation: slideIn 1s ease-in-out;
 }
 
 /* Grid layout with exactly three columns */
 .exercise-selection {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Ensures exactly 3 columns */
-    gap: 25px; /* Space between the tiles */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
     padding: 20px;
 }
 
@@ -34,35 +57,60 @@ h2 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(145deg, #ffffff, #f1f3f5); 
-    height: 170px; /* Uniform height */
+    background: linear-gradient(145deg, #5a1a2f, #c43e4e);
+    height: 180px;
     border-radius: 20px;
     border: 2px solid #e1e1e1;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     text-decoration: none;
-    color: #444;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: white;
+    font-weight: bold;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
 }
 
+/* Soft glow effect on hover */
 .exercise-tile:hover {
-    transform: translateY(-5px) scale(1.03); 
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3); 
+    transform: translateY(-12px) scale(1.07);
+    box-shadow: 0 15px 30px rgba(255, 69, 69, 0.6);
+    background: linear-gradient(145deg, #e94e77, #ff7788);
+}
+
+/* Light reflection effect */
+.exercise-tile::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    transform: rotate(-45deg);
+}
+
+.exercise-tile:hover::after {
+    opacity: 1;
 }
 
 /* Icon styling */
 .exercise-tile .icon {
-    font-size: 40px; 
+    font-size: 44px;
     margin-bottom: 10px;
-    color: #4a90e2;
+    color: #ffcccb;
+    animation: floatEffect 2s infinite ease-in-out;
 }
 
 /* Label styling */
 .exercise-tile .label {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
-    color: #666;
+    color: white;
 }
 
 /* Chatbot button */
@@ -70,7 +118,7 @@ h2 {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #4a002a;
+    background: linear-gradient(135deg, #650021, #a81d34);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -78,12 +126,15 @@ h2 {
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
     font-size: 18px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
+/* Glowing effect */
 .chatbot-button:hover {
-    background-color: #8b0038;
-    transform: scale(1.1);
+    background: linear-gradient(135deg, #ff3355, #ff7788);
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 12px 30px rgba(255, 69, 69, 0.6);
 }
 
 /* Chatbot window */
@@ -97,24 +148,57 @@ h2 {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     border-radius: 15px;
     overflow: hidden;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* @keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+} */
+
+@keyframes floatEffect {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .exercise-selection {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns for smaller screens */
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .exercise-tile {
-        height: 150px; /* Smaller tiles for smaller screens */
+        height: 160px;
     }
 
     .exercise-tile .icon {
-        font-size: 32px;
+        font-size: 38px;
     }
 
     .exercise-tile .label {
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .chatbot-window {

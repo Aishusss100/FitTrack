@@ -30,21 +30,26 @@
 .button-group {     
     display: flex;     
     gap: 10px; /* Add space between buttons */     
-    margin-left: 15px; /* Move the buttons slightly to the right */ 
+    align-items: center; /* Align buttons vertically */ 
+    margin-right:50px;
 }
 
 /* General button styling for profile, logout, and sidebar */
-.sidebar-button {
-    background-color: rgb(59, 1, 1); /* Same maroon color as buttons */
+.sidebar-button,
+.profile-button,
+.logout-button {
+    background: linear-gradient(135deg, #ff5f6d, #ffc371); /* Gradient background for an eye-catching effect */
     color: white; /* Ensure text remains white */
     border: none; /* No border */
-    padding: 8px 12px; /* Match padding with other buttons */
-    border-radius: 15px; /* Rounded corners for consistency */
-    cursor: pointer; /* Pointer cursor for clickability */
-    font-family: 'Arial', sans-serif; /* Same font as other buttons */
+    padding: 10px 16px; /* Increase padding for a more clickable and modern button */
+    border-radius: 20px; /* Fully rounded corners for a softer look */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    font-family: 'Arial', sans-serif; /* Keep a modern sans-serif font */
     font-size: 14px; /* Standard font size */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    font-weight: bold; /* Make the text bold for emphasis */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle text shadow for depth */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover and interaction effects */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Add a soft shadow for a floating effect */
     display: flex; /* Align content properly */
     align-items: center; /* Center-align icon vertically */
     justify-content: center; /* Center-align icon horizontally */
@@ -52,14 +57,70 @@
     height: auto; /* Automatically adjust button height */
 }
 
-.logout-button:hover, .profile-button:hover, .home-button:hover, .sidebar-button:hover {     
-    background-color: #9d0e0e; /* Slightly lighter maroon on hover */     
-    transform: scale(1.05); /* Slight hover zoom effect */ 
+/* Profile Button Icon Styling */
+.profile-button i {
+    font-size: 1.2rem; /* Adjust the size of the icon */
+    margin-right: 5px; /* Add spacing between the icon and text */
+    color: white; /* Ensure the icon matches the text color */
+}
+
+/* Hover Effect for Buttons */
+.sidebar-button:hover,
+.profile-button:hover,
+.logout-button:hover {
+    background: linear-gradient(135deg, #ffc371, #ff5f6d); /* Reverse gradient on hover */
+    transform: scale(1.1); /* Slight zoom effect on hover */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Enhance shadow on hover */
 }
 
 /* Disabled Button State */
-.logout-button:disabled, .sidebar-button:disabled {     
-    background-color: #ccc; /* Gray background for disabled state */     
-    cursor: not-allowed;     
-    box-shadow: none; /* Remove shadow for disabled button */ 
+.sidebar-button:disabled,
+.logout-button:disabled {
+    background: #cccccc; /* Gray background for disabled state */
+    cursor: not-allowed; /* Prevent pointer interaction */
+    box-shadow: none; /* Remove shadow for disabled button */
+    color: #7d7d7d; /* Dimmed text color for disabled state */
+}
+
+/* Streak Display Styling */
+.streak-display {
+    display: flex; /* Align icon and number horizontally */
+    align-items: center; /* Center vertically */
+    gap: 5px; /* Space between icon and number */
+    margin-left: 10px;
+    background-color: #ffe6e6; /* Light red background */
+    color: #ff4500; /* Fiery orange text */
+    border-radius: 20px; /* Fully rounded corners to match button styling */
+    padding: 5px 10px; /* Larger padding for consistency */
+    font-size: 1rem; /* Slightly larger text */
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a soft shadow for depth */
+}
+
+/* Streak Icon Styling */
+.streak-icon {
+    font-size: 1.2rem; /* Slightly larger icon */
+}
+
+/* Streak Count Styling */
+.streak-count {
+    font-size: 1rem; /* Match the size of the streak text */
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .TitleBar {
+        height: 50px;
+        font-size: 16px;
+    }
+
+    .button-group {
+        gap: 8px;
+    }
+
+    .logout-button, .profile-button, .home-button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
 }

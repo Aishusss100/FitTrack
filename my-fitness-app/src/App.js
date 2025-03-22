@@ -8,7 +8,7 @@ import TitleBars from "./components/TitleBars";
 import SplashScreen from "./components/SplashScreen";
 import Profile from "./components/Profile";
 import TidioChat from "./components/TidioChat";
-import Sidebar from "./components/Sidebar"; // Import Sidebar
+import Sidebar from "./components/TempSidebar"; // Import Sidebar
 import ProgressPage from "./components/ProgressPage"; // Import ProgressPage
 import "./App.css";
 

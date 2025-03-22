@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { Line, Bar, Pie } from "react-chartjs-2"; // Chart components
 import axios from "axios";
 import "./ProgressPage.css";
 
 const ProgressPage = () => {
   const [exerciseList, setExerciseList] = useState([]); // List of exercises
   const [selectedExercise, setSelectedExercise] = useState(""); // Selected exercise
-  const [progressData, setProgressData] = useState([]); // Progress data for selected exercise
-  const [errorMessage, setErrorMessage] = useState(""); // Error messages
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]); // Default to today's date
+  const [viewType, setViewType] = useState("daily"); // Default view: "daily"
+  const [chartData, setChartData] = useState({}); // Data for the charts
   const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [errorMessage, setErrorMessage] = useState(""); // Error messages
 
-  // Fetch available exercises when the component loads
+  // Fetch list of available exercises when the component loads
   useEffect(() => {
     const fetchExercises = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/get_exercises", {
-          withCredentials: true, // Include cookies for session
+          withCredentials: true,
         });
         setExerciseList(response.data);
         if (response.data.length > 0) {
@@ -30,39 +31,89 @@ const ProgressPage = () => {
     fetchExercises();
   }, []);
 
-  // Fetch progress data when date or exercise changes
+  // Fetch progress data for the selected exercise and view type
   useEffect(() => {
     if (!selectedExercise) return;
 
-    const fetchProgress = async () => {
+    const fetchProgressData = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get("http://localhost:5000/api/get_progress", {
-          params: { date, exercise_name: selectedExercise },
-          withCredentials: true, // Include cookies for session
+          params: { view_type: viewType, exercise_name: selectedExercise },
+          withCredentials: true,
         });
 
-        if (response.data.length === 0) {
-          setProgressData([]);
-          setErrorMessage(`No progress data available for ${selectedExercise} on ${date}.`);
-        } else {
-          setProgressData(response.data);
-          setErrorMessage("");
+        const labels = response.data.map((data) => data.date); // X-axis: Dates
+        const repsData = response.data.map((data) => data.reps); // Y-axis: Reps
+        const durationData = response.data.map((data) => data.duration / 60); // Y-axis: Duration (in mins)
+
+        if (viewType === "monthly") {
+          setChartData({
+            labels,
+            datasets: [
+              {
+                label: "Reps",
+                data: repsData,
+                borderColor: "#4a90e2",
+                backgroundColor: "rgba(74, 144, 226, 0.2)",
+                fill: true,
+              },
+              {
+                label: "Time (mins)",
+                data: durationData,
+                borderColor: "#f78fb3",
+                backgroundColor: "rgba(247, 143, 179, 0.2)",
+                fill: true,
+              },
+            ],
+          });
+        } else if (viewType === "weekly") {
+          setChartData({
+            labels,
+            datasets: [
+              {
+                label: "Reps",
+                data: repsData,
+                backgroundColor: "rgba(214, 40, 57, 0.6)",
+                borderColor: "#d62839",
+                borderWidth: 1,
+              },
+              {
+                label: "Time (mins)",
+                data: durationData,
+                backgroundColor: "rgba(74, 144, 226, 0.6)",
+                borderColor: "#4a90e2",
+                borderWidth: 1,
+              },
+            ],
+          });
+        } else if (viewType === "daily") {
+          setChartData({
+            labels: ["Reps", "Duration (mins)"],
+            datasets: [
+              {
+                data: [repsData[0], durationData[0]],
+                backgroundColor: ["#f9c74f", "#43aa8b"],
+              },
+            ],
+          });
         }
+
+        setErrorMessage("");
       } catch (error) {
         console.error("Failed to fetch progress data:", error);
-        setErrorMessage("Failed to load progress data. Please check your connection or try again.");
+        setErrorMessage("Failed to load progress data. Please check your connection.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProgress();
-  }, [date, selectedExercise]);
+    fetchProgressData();
+  }, [viewType, selectedExercise]);
 
   return (
     <div className="progress-page">
-      <h1>Progress</h1>
+      <h1>Progress Tracker</h1>
 
       {/* Exercise Selector */}
       <div className="exercise-selector">
@@ -80,34 +131,43 @@ const ProgressPage = () => {
         </select>
       </div>
 
-      {/* Date Picker */}
-      <div className="date-picker">
-        <label htmlFor="date">Select Date:</label>
-        <input
-          id="date"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
+      {/* View Selector Tabs */}
+      <div className="view-selector">
+        <button
+          className={viewType === "daily" ? "active" : ""}
+          onClick={() => setViewType("daily")}
+        >
+          Daily
+        </button>
+        <button
+          className={viewType === "weekly" ? "active" : ""}
+          onClick={() => setViewType("weekly")}
+        >
+          Weekly
+        </button>
+        <button
+          className={viewType === "monthly" ? "active" : ""}
+          onClick={() => setViewType("monthly")}
+        >
+          Monthly
+        </button>
       </div>
 
-      {/* Loading or Error Messages */}
-      {isLoading ? (
-        <div className="loading-message">Loading progress data...</div>
-      ) : errorMessage ? (
-        <div className="error-message">{errorMessage}</div>
-      ) : null}
-
-      {/* Progress List */}
-      <div className="progress-list">
-        {progressData.length > 0 && (
-          <div className="progress-item">
-            <h3>{selectedExercise.replace(/_/g, " ")}</h3>
-            <p>Reps: {progressData[0]?.reps}</p>
-            <p>Duration: {progressData[0]?.duration} seconds</p>
-          </div>
-        )}
+      {/* Charts */}
+      <div className="chart-container">
+        {isLoading ? (
+          <div className="loading-message">Loading chart...</div>
+        ) : viewType === "monthly" ? (
+          <Line data={chartData} />
+        ) : viewType === "weekly" ? (
+          <Bar data={chartData} />
+        ) : viewType === "daily" ? (
+          <Pie data={chartData} />
+        ) : null}
       </div>
+
+      {/* Error Messages */}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
     </div>
   );
 };
