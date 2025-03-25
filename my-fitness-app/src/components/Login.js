@@ -32,7 +32,7 @@ const Login = () => {
     
             // Try network IP if localhost fails
             try {
-                response = await axios.post('http://192.168.220.149:5000/api/login', {
+                response = await axios.post('http://192.168.126.149:5000/api/login', {
                     username: username,
                     password: password
                 }, {

@@ -7,7 +7,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-CORS(app, supports_credentials=True, origins=['http://localhost:3000','http://192.168.220.149:3000','http://192.168.220.67:3000'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000','http://192.168.126.149:3000','http://192.168.56.1:3000'])
 app.secret_key = 'your_secret_key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Helps with CORS issues
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
@@ -190,28 +190,16 @@ def set_target():
     target_achieved = False
     return jsonify({'message': 'Target set successfully', 'target_reps': target_reps})
 
-# API endpoint for starting the exercise
 @app.route('/api/start', methods=['POST'])
 def start_exercise():
-    global exercise_started, exercises, target_achieved, cap
+    global exercise_started
     exercise_started = True
-    target_achieved = False
-    for exercise in exercises.values():
-        exercise['counter'] = 0  # Reset counters on start
-    # Reinitialize video capture
-    if cap is None or not cap.isOpened():
-        cap = cv2.VideoCapture(0)
-    return jsonify({'message': 'Exercise started'})
+    return jsonify({'message': 'Exercise started, use your device camera'})
 
-# API endpoint for stopping the exercise
 @app.route('/api/stop', methods=['POST'])
 def stop_exercise():
-    global exercise_started, cap
+    global exercise_started
     exercise_started = False
-    # Release video capture
-    if cap is not None and cap.isOpened():
-        cap.release()
-        cap = None
     return jsonify({'message': 'Exercise stopped'})
 
 # Video Capture
