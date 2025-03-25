@@ -6,23 +6,12 @@ import "./Exercise.css";
 const Exercise = () => {
     const { exercise } = useParams();
     const DEFAULT_BACKGROUND_COLOR = "#fff";
-<<<<<<< HEAD
-    const TRACKING_BACKGROUND_COLOR = "#f5e1a4";
-=======
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
     const TARGET_SET_COLOR = "#d1f4e8";
 
     const [targetReps, setTargetReps] = useState(0);
     const [tracking, setTracking] = useState(false);
     const [backgroundColor, setBackgroundColor] = useState(DEFAULT_BACKGROUND_COLOR);
     const [errorMessage, setErrorMessage] = useState("");
-<<<<<<< HEAD
-    const [elapsedTime, setElapsedTime] = useState(0);
-    const [timerId, setTimerId] = useState(null);
-
-    const formatExerciseTitle = (exercise) => {
-        return exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
-=======
     const [loading, setLoading] = useState(false);
 
     const API_LOCAL = "http://localhost:5000/api/";
@@ -49,7 +38,6 @@ const Exercise = () => {
         } finally {
             setLoading(false);
         }
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
     };
 
     const handleSetTarget = async () => {
@@ -57,95 +45,28 @@ const Exercise = () => {
             setErrorMessage("Please enter a valid number of target repetitions.");
             return;
         }
-<<<<<<< HEAD
-        try {
-            await axios.post(
-                "http://localhost:5000/api/set_target",
-                {
-                    target_reps: targetReps,
-                    exercise,
-                },
-                { withCredentials: true }
-            );
-            setBackgroundColor(TARGET_SET_COLOR);
-            setErrorMessage("");
-        } catch (error) {
-            console.error(error);
-            setErrorMessage("Failed to set target repetitions. Please try again.");
-=======
 
         const success = await sendRequest("set_target", { target_reps: targetReps, exercise });
         if (success) {
             setBackgroundColor(TARGET_SET_COLOR);
             setErrorMessage("");
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
         }
     };
 
     const handleStart = async () => {
-<<<<<<< HEAD
-        try {
-            await axios.post(
-                "http://localhost:5000/api/start",
-                { exercise },
-                { withCredentials: true }
-            );
-            setTracking(true);
-            setElapsedTime(0);
-            setBackgroundColor(TRACKING_BACKGROUND_COLOR);
-
-            const intervalId = setInterval(() => {
-                setElapsedTime((prevTime) => prevTime + 1);
-            }, 1000);
-
-            setTimerId(intervalId);
-        } catch (error) {
-            console.error(error);
-            setErrorMessage("Failed to start exercise tracking. Please try again.");
-        }
-=======
         const success = await sendRequest("start", { exercise });
         if (success) setTracking(true);
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
     };
 
     const handleStop = async () => {
         if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
-<<<<<<< HEAD
-        try {
-            await axios.post(
-                "http://localhost:5000/api/stop",
-                {
-                    exercise_name: exercise,
-                    duration: elapsedTime,
-                    reps: targetReps || 0,
-                },
-                { withCredentials: true }
-            );
-            setTracking(false);
-            clearInterval(timerId);
-            setTimerId(null);
-            setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
-            setElapsedTime(0);
-            window.location.reload();
-        } catch (error) {
-            console.error(error);
-            setErrorMessage("Failed to stop exercise tracking. Please try again.");
-=======
         const success = await sendRequest("stop", { exercise });
         if (success) {
             setTracking(false);
             setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
             window.location.reload();
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
         }
-    };
-
-    const formatTime = (timeInSeconds) => {
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = timeInSeconds % 60;
-        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
 
     return (
@@ -175,29 +96,6 @@ const Exercise = () => {
             {errorMessage && <div className="error-message">{errorMessage}</div>}
 
             <div className="buttons">
-<<<<<<< HEAD
-                <button onClick={handleStart} disabled={tracking}>
-                    Start
-                </button>
-                <button onClick={handleStop} disabled={!tracking}>
-                    Stop
-                </button>
-            </div>
-
-            <div className="stopwatch">
-                <h2>Time: {formatTime(elapsedTime)}</h2>
-            </div>
-
-            {tracking && (
-                <div className="video-and-angle">
-                    <div className="video-feed">
-                        <h2>Video Feed</h2>
-                        <img
-                            src={`http://localhost:5000/api/video_feed?exercise=${exercise}`}
-                            alt="Video Feed"
-                        />
-                    </div>
-=======
                 <button onClick={handleStart} disabled={tracking || loading}>
                     {tracking ? "Tracking..." : "Start"}
                 </button>
@@ -209,8 +107,9 @@ const Exercise = () => {
             {tracking && (
                 <div className="video-feed">
                     <h2>Video Feed</h2>
-                    <img src={`http://localhost:5000/api/video_feed?exercise=${exercise}`} alt="Video Feed" />
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
+                    <img src={`${API_LOCAL}video_feed?exercise=${exercise}`} 
+                    onError={(e) => { e.target.src = `${API_NETWORK}video_feed?exercise=${exercise}`; }} 
+                    alt="Video Feed" />
                 </div>
             )}
         </div>
