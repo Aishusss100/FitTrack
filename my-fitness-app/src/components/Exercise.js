@@ -14,8 +14,8 @@ const Exercise = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const API_LOCAL = "http://localhost:5000/api";
-    const API_NETWORK = "http://192.168.126.149:5000/api";
+    const API_LOCAL = "http://localhost:5000/api/";
+    const API_NETWORK = "http://192.168.126.149:5000/api/";
 
     const formatExerciseTitle = (exercise) => 
         exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
@@ -46,7 +46,7 @@ const Exercise = () => {
             return;
         }
 
-        const success = await sendRequest("", { target_reps: targetReps, exercise });
+        const success = await sendRequest("set_target", { target_reps: targetReps, exercise });
         if (success) {
             setBackgroundColor(TARGET_SET_COLOR);
             setErrorMessage("");
@@ -54,14 +54,14 @@ const Exercise = () => {
     };
 
     const handleStart = async () => {
-        const success = await sendRequest("", { exercise });
+        const success = await sendRequest("start", { exercise });
         if (success) setTracking(true);
     };
 
     const handleStop = async () => {
         if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
-        const success = await sendRequest("", { exercise });
+        const success = await sendRequest("stop", { exercise });
         if (success) {
             setTracking(false);
             setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
