@@ -1,70 +1,76 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import './Exercise.css';
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import "./Exercise.css";
 
 const Exercise = () => {
     const { exercise } = useParams();
-    const DEFAULT_BACKGROUND_COLOR = '#fff'; // Default background color
-    const TARGET_SET_COLOR = '#d1f4e8'; // Background color when target is set
+    const DEFAULT_BACKGROUND_COLOR = "#fff";
+    const TARGET_SET_COLOR = "#d1f4e8";
 
     const [targetReps, setTargetReps] = useState(0);
     const [tracking, setTracking] = useState(false);
     const [backgroundColor, setBackgroundColor] = useState(DEFAULT_BACKGROUND_COLOR);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    // Format exercise title for better readability
-    const formatExerciseTitle = (exercise) => {
-        return exercise.replace(/_/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+    const API_LOCAL = "http://localhost:5000/api";
+    const API_NETWORK = "http://192.168.126.149:5000/api";
+
+    const formatExerciseTitle = (exercise) => 
+        exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
+
+    const sendRequest = async (endpoint, payload) => {
+        setLoading(true);
+        try {
+            let response = await axios.post(`${API_LOCAL}${endpoint}`, payload);
+            return response.data;
+        } catch (error) {
+            console.error("Local API failed, trying Network API...");
+            try {
+                let response = await axios.post(`${API_NETWORK}${endpoint}`, payload);
+                return response.data;
+            } catch (error) {
+                console.error("Network API failed.");
+                setErrorMessage("Failed to connect to server. Please try again.");
+                return null;
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSetTarget = async () => {
         if (targetReps <= 0) {
-            setErrorMessage('Please enter a valid number of target repetitions.');
+            setErrorMessage("Please enter a valid number of target repetitions.");
             return;
         }
-        try {
-            const response = await axios.post('http://localhost:5000/api/set_target', {
-                target_reps: targetReps,
-                exercise: exercise // Include exercise in the payload
-            });
-            console.log(response.data);
-            setBackgroundColor(TARGET_SET_COLOR); // Change background color when target is set
-            setErrorMessage(''); // Clear any previous error
-        } catch (error) {
-            console.error(error);
-            setErrorMessage('Failed to set target repetitions. Please try again.');
+
+        const success = await sendRequest("", { target_reps: targetReps, exercise });
+        if (success) {
+            setBackgroundColor(TARGET_SET_COLOR);
+            setErrorMessage("");
         }
     };
 
     const handleStart = async () => {
-        try {
-            const response = await axios.post('http://localhost:5000/api/start', { exercise });
-            console.log(response.data);
-            setTracking(true); // Ensure tracking is set to true after the start API call
-        } catch (error) {
-            console.error(error);
-            setErrorMessage('Failed to start exercise tracking. Please try again.');
-        }
+        const success = await sendRequest("", { exercise });
+        if (success) setTracking(true);
     };
 
     const handleStop = async () => {
-        if (!window.confirm('Are you sure you want to stop this exercise?')) return; // Confirm before stopping
+        if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
-        try {
-            const response = await axios.post('http://localhost:5000/api/stop');
-            console.log(response.data);
-            setTracking(false); // Ensure tracking is set to false
-            setBackgroundColor(DEFAULT_BACKGROUND_COLOR); // Reset background color
-            window.location.reload(); // Refresh the page after stopping the exercise
-        } catch (error) {
-            console.error(error);
-            setErrorMessage('Failed to stop exercise tracking. Please try again.');
+        const success = await sendRequest("", { exercise });
+        if (success) {
+            setTracking(false);
+            setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
+            window.location.reload();
         }
     };
 
     return (
-        <div className="exercise-container" style={{ backgroundColor: backgroundColor }}>
+        <div className="exercise-container" style={{ backgroundColor }}>
             <h1>{formatExerciseTitle(exercise)} Exercise</h1>
 
             <div className="instructions">
@@ -82,24 +88,26 @@ const Exercise = () => {
                     value={targetReps}
                     onChange={(e) => setTargetReps(parseInt(e.target.value) || 0)}
                 />
-                <button onClick={handleSetTarget}>Set Target</button>
+                <button onClick={handleSetTarget} disabled={loading}>
+                    {loading ? "Setting..." : "Set Target"}
+                </button>
             </div>
 
-            {/* Display error messages */}
             {errorMessage && <div className="error-message">{errorMessage}</div>}
 
             <div className="buttons">
-                <button onClick={handleStart}>Start</button>
-                <button onClick={handleStop}>Stop</button>
+                <button onClick={handleStart} disabled={tracking || loading}>
+                    {tracking ? "Tracking..." : "Start"}
+                </button>
+                <button onClick={handleStop} disabled={!tracking || loading}>
+                    Stop
+                </button>
             </div>
 
             {tracking && (
                 <div className="video-feed">
                     <h2>Video Feed</h2>
-                    <img
-                        src={`http://localhost:5000/api/video_feed?exercise=${exercise}`}
-                        alt="Video Feed"
-                    />
+                    <img src={`http://localhost:5000/api/video_feed?exercise=${exercise}`} alt="Video Feed" />
                 </div>
             )}
         </div>
