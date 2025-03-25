@@ -15,7 +15,7 @@ body {
   padding-top: 80px;
 }
 
-/* Main Layout - Increased size and padding */
+/* Main Layout */
 .goal-tracking-container {
   display: flex;
   justify-content: space-between;
@@ -24,132 +24,131 @@ body {
   max-width: 95%;
   width: 1400px;
   margin: auto;
-  margin-top:150px;
+  margin-top: 120px;
   font-family: 'Poppins', sans-serif;
   color: #f5e1c8;
   min-height: 85vh;
-  gap: 50px;
+  gap: 40px;
 }
 
 /* Left Section: Set New Goals */
 .set-goals-section {
   width: 38%;
-  background: #800000;
+  background: linear-gradient(135deg, #800000, #a52a2a);
   padding: 40px 35px;
   border-radius: 16px;
-  box-shadow: 6px 6px 30px rgba(0, 0, 0, 0.4);
-  margin-top:150px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
   text-align: center;
   height: fit-content;
+  backdrop-filter: blur(10px);
 }
 
 .set-goals-section h2 {
   color: #f5e1c8;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   font-size: 28px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #d4af7a;
+  padding-bottom: 12px;
+  border-bottom: 3px solid #d4af7a;
 }
 
 /* Form Styling */
 .add-goal-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-
-.add-goal-form label {
-  font-weight: bold;
-  color: #f5e1c8;
-  font-size: 17px;
+  gap: 16px;
 }
 
 .add-goal-form input,
 .add-goal-form select {
-  padding: 16px;
-  margin-top: 8px;
+  padding: 14px;
+  margin-top: 6px;
   border: 2px solid #d4af7a;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #f5e1c8;
   color: #800000;
-  font-weight: bold;
   font-size: 16px;
 }
 
 .add-goal-form button {
-  background: #d4af7a;
+  background: linear-gradient(135deg, #d4af7a, #f5e1c8);
   color: #800000;
-  padding: 18px;
+  padding: 16px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease-in-out;
-  margin-top: 30px;
   font-size: 18px;
+  font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 .add-goal-form button:hover {
   background: #f5e1c8;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
 /* Right Section: Active & Achieved Goals */
 .goal-columns {
   display: flex;
   flex-direction: column;
-  margin-top:150px;
-  width: 62%;
-  gap: 40px;
+  width: 60%;
+  gap: 30px;
 }
 
 /* Active & Achieved Goals Containers */
 .active-goals-container,
 .achieved-goals-container {
-  background: #400000;
-  padding: 40px 35px;
-  margin-bottom: 30px;
-  border-radius: 16px;
-  box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease-in-out;
-}
-
-.active-goals-container h2,
-.achieved-goals-container h2 {
-  color: #f5e1c8;
-  margin-bottom: 25px;
-  font-size: 28px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #d4af7a;
-}
-
-/* Individual Goal Cards */
-.goal-card {
-  background: #800000;
+  background: rgba(128, 0, 0, 0.3);
   padding: 25px;
-  margin: 20px 0;
-  border-radius: 12px;
-  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+/* Stylish Scrollbar */
+.active-goals-container::-webkit-scrollbar,
+.achieved-goals-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.active-goals-container::-webkit-scrollbar-thumb,
+.achieved-goals-container::-webkit-scrollbar-thumb {
+  background: #d4af7a;
+  border-radius: 3px;
+}
+
+.active-goals-container::-webkit-scrollbar-thumb:hover,
+.achieved-goals-container::-webkit-scrollbar-thumb:hover {
+  background: #f5e1c8;
+}
+
+/* Goal Cards - Glassmorphism Style */
+.goal-card {
+  background: rgba(128, 0, 0, 0.7);
+  padding: 22px;
+  margin: 15px 0;
+  border-radius: 14px;
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease-in-out;
+  backdrop-filter: blur(5px);
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Added spacing between texts inside the card */
+  gap: 10px;
   align-items: flex-start;
-  border-left: 5px solid #d4af7a;
+  border-left: 6px solid #d4af7a;
 }
 
 .goal-card:hover {
-  background: #a52a2a;
+  background: rgba(165, 42, 42, 0.9);
   transform: translateY(-5px);
-  box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 5px 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .goal-card h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   color: #f5e1c8;
 }
@@ -157,27 +156,24 @@ body {
 .goal-card p {
   font-size: 16px;
   color: #f5e1c8;
-  margin-top: 8px; /* Added spacing between paragraphs */
-  line-height: 1.6; /* Ensures better readability of lines */
+  line-height: 1.6;
 }
 
 /* Progress Bar */
 .progress-container {
   width: 100%;
-  height: 20px; /* Increased height for a larger progress bar */
-  background: #300000;
-  border-radius: 12px; /* Adjusted for smoother edges */
-  margin-top: 15px;
+  height: 16px;
+  background: rgba(48, 0, 0, 0.8);
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(to right, #d4af7a, #f5e1c8);
+  background: linear-gradient(135deg, #d4af7a, #f5e1c8);
   width: 0;
   transition: width 0.5s ease-in-out;
 }
-
 
 /* Empty State Styling */
 .empty-goals-message {
@@ -193,7 +189,7 @@ body {
   .goal-tracking-container {
     flex-direction: column;
     align-items: stretch;
-    gap: 30px;
+    gap: 25px;
   }
 
   .set-goals-section {
@@ -203,14 +199,27 @@ body {
   .goal-columns {
     width: 100%;
   }
+
+  .goal-card {
+    padding: 18px;
+  }
 }
 
 @media screen and (max-width: 576px) {
   .goal-card {
-    padding: 200px;
+    padding: 15px;
+  }
+
+  .goal-card h3 {
+    font-size: 18px;
   }
 
   .goal-card p {
     font-size: 14px;
+  }
+
+  .add-goal-form button {
+    padding: 14px;
+    font-size: 16px;
   }
 }

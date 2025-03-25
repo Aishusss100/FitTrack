@@ -14,7 +14,7 @@ from exercise_tracker import (
 )
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=['http://localhost:3000','http://192.168.126.149:3000','http://192.168.220.67:3000'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 app.secret_key = 'your_secret_key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
@@ -483,15 +483,20 @@ def create_goal():
     # Check if user is logged in
     if 'username' not in session:
         return jsonify({'message': 'User not logged in'}), 401
-
+    
     data = request.get_json()
     
     # Enhanced validation
     exercise_name = data.get('exercise_name', '').strip()
-    target_reps = data.get('target_reps', 0)
-    target_duration = data.get('target_duration', 0)
-    days_to_complete = data.get('days_to_complete', 0)
-
+    
+    # Convert to integers and handle potential conversion errors
+    try:
+        target_reps = int(data.get('target_reps', ''))
+        target_duration = int(data.get('target_duration', ''))
+        days_to_complete = int(data.get('days_to_complete', ''))
+    except (ValueError, TypeError):
+        return jsonify({'message': 'Invalid numeric inputs'}), 400
+    
     # Comprehensive input validation
     if not exercise_name:
         return jsonify({'message': 'Exercise name is required'}), 400
@@ -504,12 +509,13 @@ def create_goal():
     
     if days_to_complete <= 0:
         return jsonify({'message': 'Days to complete must be greater than 0'}), 400
-
+    
     username = session['username']
     created_at = date.today()
-
+    
     conn = sqlite3.connect('exercise_progress_with_duration.db')
     c = conn.cursor()
+    
     try:
         c.execute('''
             INSERT INTO user_goals (username, exercise_name, target_reps, target_duration, days_to_complete, created_at, is_achieved)
@@ -538,7 +544,7 @@ def create_goal():
     finally:
         conn.close()
 
-# Fetch goals
+        
 @app.route('/api/get_goals', methods=['GET'])
 def get_goals():
     if 'username' not in session:
@@ -705,8 +711,4 @@ def check_goal_progress():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     app.run(debug=True)
-=======
-    app.run(host='0.0.0.0', port=5000, debug=True)
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
