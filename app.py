@@ -12,7 +12,7 @@ from exercise_tracker import (
 )
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000','http://192.168.126.149:3000','http://192.168.220.67:3000'])
 app.secret_key = 'your_secret_key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Helps with CORS issues
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
@@ -182,4 +182,4 @@ def video_feed():
     return Response(generate_video_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
