@@ -705,8 +705,5 @@ def check_goal_progress():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    app.run(debug=True)
-=======
     app.run(host='0.0.0.0', port=5000, debug=True)
->>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
+
