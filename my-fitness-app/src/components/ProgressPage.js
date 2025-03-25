@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Line, Bar, Pie } from "react-chartjs-2"; // Chart components
 import axios from "axios";
 import "./ProgressPage.css";
 
 const ProgressPage = () => {
-  const [exerciseList, setExerciseList] = useState([]); // List of exercises
-  const [selectedExercise, setSelectedExercise] = useState(""); // Selected exercise
-  const [viewType, setViewType] = useState("daily"); // Default view: "daily"
-  const [chartData, setChartData] = useState({}); // Data for the charts
-  const [isLoading, setIsLoading] = useState(false); // Loading state
-  const [errorMessage, setErrorMessage] = useState(""); // Error messages
+  const [exerciseList, setExerciseList] = useState([]);
+  const [selectedExercise, setSelectedExercise] = useState("");
+  const [viewType, setViewType] = useState("daily");
+  const [progressData, setProgressData] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch list of available exercises when the component loads
   useEffect(() => {
     const fetchExercises = async () => {
       try {
@@ -20,7 +18,7 @@ const ProgressPage = () => {
         });
         setExerciseList(response.data);
         if (response.data.length > 0) {
-          setSelectedExercise(response.data[0]); // Default to the first exercise
+          setSelectedExercise(response.data[0]);
         }
       } catch (error) {
         console.error("Failed to fetch exercises:", error);
@@ -31,7 +29,6 @@ const ProgressPage = () => {
     fetchExercises();
   }, []);
 
-  // Fetch progress data for the selected exercise and view type
   useEffect(() => {
     if (!selectedExercise) return;
 
@@ -43,62 +40,7 @@ const ProgressPage = () => {
           withCredentials: true,
         });
 
-        const labels = response.data.map((data) => data.date); // X-axis: Dates
-        const repsData = response.data.map((data) => data.reps); // Y-axis: Reps
-        const durationData = response.data.map((data) => data.duration / 60); // Y-axis: Duration (in mins)
-
-        if (viewType === "monthly") {
-          setChartData({
-            labels,
-            datasets: [
-              {
-                label: "Reps",
-                data: repsData,
-                borderColor: "#4a90e2",
-                backgroundColor: "rgba(74, 144, 226, 0.2)",
-                fill: true,
-              },
-              {
-                label: "Time (mins)",
-                data: durationData,
-                borderColor: "#f78fb3",
-                backgroundColor: "rgba(247, 143, 179, 0.2)",
-                fill: true,
-              },
-            ],
-          });
-        } else if (viewType === "weekly") {
-          setChartData({
-            labels,
-            datasets: [
-              {
-                label: "Reps",
-                data: repsData,
-                backgroundColor: "rgba(214, 40, 57, 0.6)",
-                borderColor: "#d62839",
-                borderWidth: 1,
-              },
-              {
-                label: "Time (mins)",
-                data: durationData,
-                backgroundColor: "rgba(74, 144, 226, 0.6)",
-                borderColor: "#4a90e2",
-                borderWidth: 1,
-              },
-            ],
-          });
-        } else if (viewType === "daily") {
-          setChartData({
-            labels: ["Reps", "Duration (mins)"],
-            datasets: [
-              {
-                data: [repsData[0], durationData[0]],
-                backgroundColor: ["#f9c74f", "#43aa8b"],
-              },
-            ],
-          });
-        }
-
+        setProgressData(response.data);
         setErrorMessage("");
       } catch (error) {
         console.error("Failed to fetch progress data:", error);
@@ -111,10 +53,20 @@ const ProgressPage = () => {
     fetchProgressData();
   }, [viewType, selectedExercise]);
 
+  // Function to determine progress status
+  const getProgressStatus = (current, previous) => {
+    if (!previous) return "🆕 First Entry"; // No previous data
+
+    const currentEfficiency = current.reps / current.duration;
+    const previousEfficiency = previous.reps / previous.duration;
+
+    if (currentEfficiency > previousEfficiency) return "🟢 Improved";
+    if (currentEfficiency < previousEfficiency) return "🔴 Needs Improvement";
+    return "🟡 No Change";
+  };
+
   return (
     <div className="progress-page">
-      <h1>Progress Tracker</h1>
-
       {/* Exercise Selector */}
       <div className="exercise-selector">
         <label htmlFor="exercise">Select Exercise:</label>
@@ -125,49 +77,53 @@ const ProgressPage = () => {
         >
           {exerciseList.map((exercise, index) => (
             <option key={index} value={exercise}>
-              {exercise.replace(/_/g, " ")} {/* Format exercise names */}
+              {exercise.replace(/_/g, " ")}
             </option>
           ))}
         </select>
       </div>
 
-      {/* View Selector Tabs */}
+      {/* View Selector */}
       <div className="view-selector">
-        <button
-          className={viewType === "daily" ? "active" : ""}
-          onClick={() => setViewType("daily")}
-        >
-          Daily
-        </button>
-        <button
-          className={viewType === "weekly" ? "active" : ""}
-          onClick={() => setViewType("weekly")}
-        >
-          Weekly
-        </button>
-        <button
-          className={viewType === "monthly" ? "active" : ""}
-          onClick={() => setViewType("monthly")}
-        >
-          Monthly
-        </button>
+        <button className={viewType === "daily" ? "active" : ""} onClick={() => setViewType("daily")}>Daily</button>
+        <button className={viewType === "weekly" ? "active" : ""} onClick={() => setViewType("weekly")}>Weekly</button>
+        <button className={viewType === "monthly" ? "active" : ""} onClick={() => setViewType("monthly")}>Monthly</button>
       </div>
 
-      {/* Charts */}
-      <div className="chart-container">
-        {isLoading ? (
-          <div className="loading-message">Loading chart...</div>
-        ) : viewType === "monthly" ? (
-          <Line data={chartData} />
-        ) : viewType === "weekly" ? (
-          <Bar data={chartData} />
-        ) : viewType === "daily" ? (
-          <Pie data={chartData} />
-        ) : null}
-      </div>
+      {/* Loading Indicator */}
+      {isLoading && <div className="loading-message">Loading...</div>}
 
       {/* Error Messages */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+      {/* Progress Data */}
+      {!isLoading && progressData.length > 0 && (
+        <div className="progress-list">
+          {progressData.map((entry, index) => {
+            const previousEntry = index > 0 ? progressData[index - 1] : null;
+            const progressStatus = viewType !== "daily" ? getProgressStatus(entry, previousEntry) : null;
+
+            return (
+              <div key={index} className="progress-item">
+                <p><strong>Date:</strong> {entry.date}</p>
+                <p><strong>Reps:</strong> {entry.reps}</p>
+                <p><strong>Duration:</strong> {(entry.duration / 60).toFixed(2)} mins</p>
+                <p><strong>Efficiency:</strong> {(entry.reps / entry.duration).toFixed(2)}</p>
+                {viewType !== "daily" && (
+                  <p className={`progress-status ${progressStatus.includes("Improved") ? "improved" : progressStatus.includes("Needs") ? "declined" : "no-change"}`}>
+                    <strong>Progress:</strong> {progressStatus}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* No Data Message */}
+      {!isLoading && progressData.length === 0 && !errorMessage && (
+        <div className="no-data-message">No progress data available for this selection.</div>
+      )}
     </div>
   );
 };

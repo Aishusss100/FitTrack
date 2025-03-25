@@ -1,0 +1,216 @@
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1a0000;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  padding-top: 80px;
+}
+
+/* Main Layout - Increased size and padding */
+.goal-tracking-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 40px;
+  max-width: 95%;
+  width: 1400px;
+  margin: auto;
+  margin-top:150px;
+  font-family: 'Poppins', sans-serif;
+  color: #f5e1c8;
+  min-height: 85vh;
+  gap: 50px;
+}
+
+/* Left Section: Set New Goals */
+.set-goals-section {
+  width: 38%;
+  background: #800000;
+  padding: 40px 35px;
+  border-radius: 16px;
+  box-shadow: 6px 6px 30px rgba(0, 0, 0, 0.4);
+  margin-top:150px;
+  text-align: center;
+  height: fit-content;
+}
+
+.set-goals-section h2 {
+  color: #f5e1c8;
+  margin-bottom: 25px;
+  font-size: 28px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #d4af7a;
+}
+
+/* Form Styling */
+.add-goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.add-goal-form label {
+  font-weight: bold;
+  color: #f5e1c8;
+  font-size: 17px;
+}
+
+.add-goal-form input,
+.add-goal-form select {
+  padding: 16px;
+  margin-top: 8px;
+  border: 2px solid #d4af7a;
+  border-radius: 10px;
+  background: #f5e1c8;
+  color: #800000;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.add-goal-form button {
+  background: #d4af7a;
+  color: #800000;
+  padding: 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+  margin-top: 30px;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-goal-form button:hover {
+  background: #f5e1c8;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Right Section: Active & Achieved Goals */
+.goal-columns {
+  display: flex;
+  flex-direction: column;
+  margin-top:150px;
+  width: 62%;
+  gap: 40px;
+}
+
+/* Active & Achieved Goals Containers */
+.active-goals-container,
+.achieved-goals-container {
+  background: #400000;
+  padding: 40px 35px;
+  margin-bottom: 30px;
+  border-radius: 16px;
+  box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+.active-goals-container h2,
+.achieved-goals-container h2 {
+  color: #f5e1c8;
+  margin-bottom: 25px;
+  font-size: 28px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #d4af7a;
+}
+
+/* Individual Goal Cards */
+.goal-card {
+  background: #800000;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Added spacing between texts inside the card */
+  align-items: flex-start;
+  border-left: 5px solid #d4af7a;
+}
+
+.goal-card:hover {
+  background: #a52a2a;
+  transform: translateY(-5px);
+  box-shadow: 5px 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.goal-card h3 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f5e1c8;
+}
+
+.goal-card p {
+  font-size: 16px;
+  color: #f5e1c8;
+  margin-top: 8px; /* Added spacing between paragraphs */
+  line-height: 1.6; /* Ensures better readability of lines */
+}
+
+/* Progress Bar */
+.progress-container {
+  width: 100%;
+  height: 20px; /* Increased height for a larger progress bar */
+  background: #300000;
+  border-radius: 12px; /* Adjusted for smoother edges */
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(to right, #d4af7a, #f5e1c8);
+  width: 0;
+  transition: width 0.5s ease-in-out;
+}
+
+
+/* Empty State Styling */
+.empty-goals-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #d4af7a;
+  font-style: italic;
+  font-size: 18px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 992px) {
+  .goal-tracking-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 30px;
+  }
+
+  .set-goals-section {
+    width: 100%;
+  }
+
+  .goal-columns {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .goal-card {
+    padding: 200px;
+  }
+
+  .goal-card p {
+    font-size: 14px;
+  }
+}

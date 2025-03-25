@@ -32,12 +32,14 @@ const Sidebar = ({ onClose }) => {
 
   return (
     <div className="sidebar">
+      {/* Sidebar Header */}
       <div className="sidebar-header">
         <h2 className="username">{error || username}</h2> {/* Display username or error */}
         <button className="sidebar-button back-button" onClick={onClose}>
           ← {/* Back arrow */}
         </button>
       </div>
+      {/* Sidebar Navigation */}
       <nav className="sidebar-nav">
         <NavLink
           to="/home"
@@ -59,6 +61,13 @@ const Sidebar = ({ onClose }) => {
           onClick={onClose}
         >
           Progress
+        </NavLink>
+        <NavLink
+          to="/goals"
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")} // New Goal Tracker link
+          onClick={onClose}
+        >
+          Goal Tracker
         </NavLink>
         <NavLink
           to="/feedback"

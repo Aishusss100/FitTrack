@@ -206,3 +206,113 @@ h2 {
         height: 400px;
     }
 }
+/* Small Floating Round Button */
+/* Small Floating Round Button */
+.floating-round-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #721212, #9d0e0e); /* Rich maroon gradient */
+    color: #ffffff; /* White text */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #FFD700; /* Gold border */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.floating-round-button:hover {
+    background: linear-gradient(135deg, #9d0e0e, #c41414);
+    color: #FFD700; /* Gold text on hover */
+    transform: scale(1.1);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Modal Content */
+.modal-content {
+    background: #3c1a1a; /* Deep maroon */
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.4);
+    border: 3px solid #FFD700; /* Gold border */
+    color: #ffffff; /* White text */
+    font-size: 18px;
+    max-width: 400px;
+    animation: slideDown 0.4s ease-in-out;
+}
+
+/* Modal Header */
+.modal-header {
+    font-size: 22px;
+    font-weight: bold;
+    color: #FFD700; /* Gold text for emphasis */
+    margin-bottom: 10px;
+}
+
+/* Modal Body */
+.modal-body {
+    font-size: 16px;
+    color: #f5f5f5; /* Soft white for readability */
+    line-height: 1.5;
+}
+
+/* Close Button */
+.close-modal-button {
+    background: linear-gradient(135deg, #721212, #9d0e0e);
+    color: #ffffff;
+    border: 2px solid #FFD700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.close-modal-button:hover {
+    background: linear-gradient(135deg, #9d0e0e, #c41414);
+    color: #FFD700;
+    transform: scale(1.1);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Add the shake animation to the button */
+.floating-round-button.shake {
+    animation: shake 0.5s; /* Shake animation duration */
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

@@ -47,7 +47,6 @@ function TitleBarHome({ toggleSidebar }) {
   );
 }
 
-
 // Exercise Title Bar
 function TitleBarExercise({ toggleSidebar }) {
   const navigate = useNavigate();
@@ -105,6 +104,25 @@ function TitleBarProgress({ toggleSidebar }) {
   );
 }
 
+// Goals Title Bar (NEW)
+function TitleBarGoals({ toggleSidebar }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => navigate("/login");
+  const goToHome = () => navigate("/home");
+
+  return (
+    <header className="TitleBar">
+      <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
+      <h1>Goal Tracker</h1>
+      <div className="button-group">
+        <button className="home-button" onClick={goToHome}>Home</button>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </header>
+  );
+}
+
 // Login Title Bar
 function TitleBarLogin() {
   return (
@@ -128,6 +146,8 @@ function TitleBars({ toggleSidebar }) {
       return <TitleBarProfile toggleSidebar={toggleSidebar} />;
     case pathname === "/progress":
       return <TitleBarProgress toggleSidebar={toggleSidebar} />;
+    case pathname === "/goals": // New case for the goal tracker
+      return <TitleBarGoals toggleSidebar={toggleSidebar} />;
     case pathname === "/login":
       return <TitleBarLogin />;
     default:

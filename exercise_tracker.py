@@ -310,7 +310,7 @@ def process_bicep_curl(landmarks, side):
                 announce_target_achieved()
 
 def process_overhead_press(landmarks, side):
-    """Logic for overhead presses (left/right)"""
+    """Logic for overhead presses (left/right) with vertical check"""
     global exercises, target_reps, target_achieved, username
     exercise_key = f'overhead_press_{side.lower()}'
     if current_exercise != exercise_key:
@@ -331,12 +331,15 @@ def process_overhead_press(landmarks, side):
         wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
 
-    angle = calculate_angle(elbow, shoulder, wrist)
+    angle = calculate_angle(shoulder, elbow, wrist)
+
+    # Verticality check
+    is_vertical = abs(wrist[0] - shoulder[0]) < 0.1 and wrist[1] < shoulder[1]  # Example threshold for alignment
 
     # Overhead press logic
-    if angle < 80:
+    if 85 < angle < 95:  # Detect 90-degree angle
         exercises[f'overhead_press_{side.lower()}']['stage'] = "down"
-    if angle > 165 and exercises[f'overhead_press_{side.lower()}']['stage'] == "down":
+    if angle > 165 and exercises[f'overhead_press_{side.lower()}']['stage'] == "down" and is_vertical:  # Check verticality before "up"
         exercises[f'overhead_press_{side.lower()}']['stage'] = "up"
         exercises[f'overhead_press_{side.lower()}']['counter'] += 1
 
@@ -347,6 +350,7 @@ def process_overhead_press(landmarks, side):
             if not target_achieved:  # Only trigger when target_achieved is False
                 target_achieved = True
                 announce_target_achieved()
+
 
 def process_lateral_raise(landmarks, side):
     """Logic for lateral raises (left/right)"""

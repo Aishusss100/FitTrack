@@ -1,8 +1,17 @@
 /* components/SplashScreen.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 .SplashScreen {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: fixed; /* Ensure it covers the whole screen */
+    top: 0;
+    left: 0;
     height: 100vh;
     width: 100vw;
     background-size: cover; /* Ensure the image covers the entire screen */
@@ -10,22 +19,32 @@
     font-family: 'Arial', sans-serif;
     font-size: 48px; /* Larger font for the splash screen */
     color: white;
+    overflow: hidden; /* Prevent unwanted scrollbars */
 }
 
 .SplashShape {
-    background-color: rgba(45, 4, 4, 0.8); /* Semi-transparent maroon color */
-    width: 200px;
-    height: 100px;
+    background-color: rgba(45, 4, 4, 0.85); /* Slightly darker semi-transparent maroon */
+    width: 220px;
+    height: 110px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
-    animation: fadeinout 3s forwards; /* Add fade-in and fade-out animation */
-    border-radius: 20px; /* Rounded edges for a dumbbell shape */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Deeper shadow for premium feel */
+    animation: fadeInOut 3s ease-in-out forwards, scaleUp 3s ease-in-out forwards;
+    border-radius: 25px; /* More rounded edges */
 }
 
-@keyframes fadeinout {
+/* Fade-in and fade-out animation */
+@keyframes fadeInOut {
     0% { opacity: 0; }
-    50% { opacity: 1; }
+    30% { opacity: 1; }
+    70% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+/* Subtle scaling effect */
+@keyframes scaleUp {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1); }
+    100% { transform: scale(1.1); }
 }

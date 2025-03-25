@@ -1,181 +1,174 @@
-/* Progress Page Container */
+/* 🌟 Main Container - More Space-Occupying */
 .progress-page {
-    display: flex; /* Align items in a flex container */
-    flex-direction: column; /* Stack items vertically */
-    justify-content: center; /* Center contents vertically */
-    align-items: center; /* Center contents horizontally */
-    padding: 40px 20px;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #ffe6e6, #ffcccc); /* Soft pastel maroon theme */
-    min-height: 100vh;
-    animation: fadeIn 1s ease-in-out; /* Smooth fade-in animation */
-}
-
-/* Title */
-h1 {
-    text-align: center;
-    color: #4a002a; /* Rich maroon */
-    font-size: 36px; /* Larger font size for emphasis */
-    margin-bottom: 30px;
-    text-transform: uppercase;
-    letter-spacing: 2px; /* Add spacing for stylish appearance */
-    animation: slideDown 0.8s ease-out; /* Slide-down entrance animation */
-}
-
-/* Exercise Selector and Date Picker */
-.exercise-selector,
-.date-picker {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    gap: 15px; /* Space between selector elements */
-    background: rgba(255, 255, 255, 0.3); /* Frosted effect for elegance */
-    padding: 15px 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-    margin-bottom: 30px; /* Space below */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.exercise-selector:hover,
-.date-picker:hover {
-    transform: scale(1.05); /* Slight zoom effect */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* Labels */
-label {
-    font-size: 18px; /* Slightly larger text */
-    color: #4a002a;
-    font-weight: bold;
-}
-
-/* Input and Select Boxes */
-select,
-input {
-    padding: 12px;
-    font-size: 16px;
-    color: #4a002a;
-    border: 2px solid #8b0038;
-    border-radius: 10px;
-    background: #ffeff1; /* Softer background for inputs */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-select:hover,
-input:hover {
-    border-color: #d62839; /* Bright hover color */
-    box-shadow: 0 0 15px rgba(214, 40, 57, 0.4); /* Glow effect on hover */
-}
-
-/* Loading and Error Messages */
-.loading-message,
-.error-message {
+    justify-content: center;
+    min-height: 100vh;
+    padding: 120px 40px; /* Extra spacing for a larger feel */
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ffe6e6, #ffb3b3);
     text-align: center;
-    margin: 20px 0;
-    font-size: 20px; /* Slightly larger messages */
-    color: #e74c3c;
-}
-
-.loading-message {
-    color: #d62839;
-    font-weight: bold;
-}
-
-/* Progress List Container */
-.progress-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Center all cards */
-    gap: 25px;
-    margin-top: 40px;
     width: 100%;
 }
 
-/* Progress Item Cards */
+/* 🏋️ Exercise Selector - Bigger & Bolder */
+.exercise-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 30px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 420px; /* Wider for a bolder look */
+    margin-top: 120px;
+}
+
+.exercise-selector:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* 🎭 Styled Dropdown - Larger & More Interactive */
+select {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #4a002a;
+    background: rgba(255, 255, 255, 0.85);
+    border: 3px solid #8b0038;
+    border-radius: 15px;
+    outline: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+select:hover, select:focus {
+    border-color: #4a002a;
+    background: rgba(255, 255, 255, 1);
+}
+
+/* 🔄 View Selector - Bigger Buttons & More Spacing */
+.view-selector {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.view-selector button {
+    padding: 14px 28px;
+    font-size: 18px;
+    border-radius: 12px;
+    border: 3px solid #8b0038;
+    background: #ffdde1;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+    color: #8b0038;
+}
+
+.view-selector button.active {
+    background: #8b0038;
+    color: white;
+}
+
+.view-selector button:hover {
+    background: #c50050;
+    color: white;
+}
+
+/* 📈 Progress List - More Space Coverage */
+.progress-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px; /* Increased spacing for a more open layout */
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* 📊 Progress Item - Larger & More Prominent */
 .progress-item {
     background: #ffffff;
-    border: 1px solid #dcdde1;
-    border-radius: 15px;
+    border-radius: 20px;
     padding: 25px;
-    width: 320px; /* Consistent width */
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2); /* Stronger shadow for emphasis */
+    width: 340px; /* Larger width */
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+    text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
-    overflow: hidden;
 }
 
-/* Gradient highlight on top */
-.progress-item::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 80%;
-    height: 6px;
-    background: linear-gradient(90deg, #8b0038, #d62839);
-    transform: translateX(-50%);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-}
-
-/* Hover effect */
+/* 📌 Hover Effect - More Dynamic */
 .progress-item:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3); /* Lift effect on hover */
+    transform: scale(1.08);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* Progress Item Text */
-.progress-item h3 {
-    margin-bottom: 12px;
-    color: #4a002a;
-    font-size: 20px; /* Larger font for emphasis */
-    font-weight: bold;
-    text-align: center;
-}
-
+/* 📢 Progress Text - Larger & More Readable */
 .progress-item p {
-    margin: 6px 0;
-    color: #7f8c8d;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* 🎖️ Progress Status Badge - Bigger & More Visible */
+.progress-status {
+    font-weight: bold;
     font-size: 16px;
-    text-align: center; /* Center-align text */
+    padding: 8px 14px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 12px;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* 🚦 Status Colors - Bigger & Bolder */
+.progress-status.improved {
+    color: #2ecc71;
+    background: #eafaf1;
+    font-size: 17px;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.progress-status.no-change {
+    color: #f4c542;
+    background: #fcf3cf;
+    font-size: 17px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+.progress-status.declined {
+    color: #e74c3c;
+    background: #fdecea;
+    font-size: 17px;
+}
+
+/* ⚠️ Loading & Error Messages - Bigger & More Noticeable */
+.loading-message, .error-message, .no-data-message {
+    font-size: 20px;
+    font-weight: bold;
+    color: #d62839;
+    margin-top: 25px;
+}
+
+/* 📱 Mobile Responsiveness - Adjust for Bigger Elements */
+@media (max-width: 600px) {
+    .progress-page {
+        padding: 30px;
+    }
+
+    .exercise-selector {
+        width: 100%;
+    }
+
+    .progress-list {
+        flex-direction: column;
+        align-items: center;
+    }
+
     .progress-item {
-        width: 90%;
-    }
-
-    h1 {
-        font-size: 28px;
-    }
-
-    .exercise-selector,
-    .date-picker {
-        flex-direction: column; /* Stack selectors vertically */
+        width: 95%;
     }
 }
