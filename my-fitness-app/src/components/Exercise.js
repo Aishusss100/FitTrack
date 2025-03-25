@@ -6,18 +6,50 @@ import "./Exercise.css";
 const Exercise = () => {
     const { exercise } = useParams();
     const DEFAULT_BACKGROUND_COLOR = "#fff";
+<<<<<<< HEAD
     const TRACKING_BACKGROUND_COLOR = "#f5e1a4";
+=======
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
     const TARGET_SET_COLOR = "#d1f4e8";
 
     const [targetReps, setTargetReps] = useState(0);
     const [tracking, setTracking] = useState(false);
     const [backgroundColor, setBackgroundColor] = useState(DEFAULT_BACKGROUND_COLOR);
     const [errorMessage, setErrorMessage] = useState("");
+<<<<<<< HEAD
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerId, setTimerId] = useState(null);
 
     const formatExerciseTitle = (exercise) => {
         return exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
+=======
+    const [loading, setLoading] = useState(false);
+
+    const API_LOCAL = "http://localhost:5000/api/";
+    const API_NETWORK = "http://192.168.126.149:5000/api/";
+
+    const formatExerciseTitle = (exercise) => 
+        exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
+
+    const sendRequest = async (endpoint, payload) => {
+        setLoading(true);
+        try {
+            let response = await axios.post(`${API_LOCAL}${endpoint}`, payload);
+            return response.data;
+        } catch (error) {
+            console.error("Local API failed, trying Network API...");
+            try {
+                let response = await axios.post(`${API_NETWORK}${endpoint}`, payload);
+                return response.data;
+            } catch (error) {
+                console.error("Network API failed.");
+                setErrorMessage("Failed to connect to server. Please try again.");
+                return null;
+            }
+        } finally {
+            setLoading(false);
+        }
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
     };
 
     const handleSetTarget = async () => {
@@ -25,6 +57,7 @@ const Exercise = () => {
             setErrorMessage("Please enter a valid number of target repetitions.");
             return;
         }
+<<<<<<< HEAD
         try {
             await axios.post(
                 "http://localhost:5000/api/set_target",
@@ -39,10 +72,18 @@ const Exercise = () => {
         } catch (error) {
             console.error(error);
             setErrorMessage("Failed to set target repetitions. Please try again.");
+=======
+
+        const success = await sendRequest("set_target", { target_reps: targetReps, exercise });
+        if (success) {
+            setBackgroundColor(TARGET_SET_COLOR);
+            setErrorMessage("");
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
         }
     };
 
     const handleStart = async () => {
+<<<<<<< HEAD
         try {
             await axios.post(
                 "http://localhost:5000/api/start",
@@ -62,11 +103,16 @@ const Exercise = () => {
             console.error(error);
             setErrorMessage("Failed to start exercise tracking. Please try again.");
         }
+=======
+        const success = await sendRequest("start", { exercise });
+        if (success) setTracking(true);
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
     };
 
     const handleStop = async () => {
         if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
+<<<<<<< HEAD
         try {
             await axios.post(
                 "http://localhost:5000/api/stop",
@@ -86,6 +132,13 @@ const Exercise = () => {
         } catch (error) {
             console.error(error);
             setErrorMessage("Failed to stop exercise tracking. Please try again.");
+=======
+        const success = await sendRequest("stop", { exercise });
+        if (success) {
+            setTracking(false);
+            setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
+            window.location.reload();
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
         }
     };
 
@@ -114,12 +167,15 @@ const Exercise = () => {
                     value={targetReps}
                     onChange={(e) => setTargetReps(parseInt(e.target.value) || 0)}
                 />
-                <button onClick={handleSetTarget}>Set Target</button>
+                <button onClick={handleSetTarget} disabled={loading}>
+                    {loading ? "Setting..." : "Set Target"}
+                </button>
             </div>
 
             {errorMessage && <div className="error-message">{errorMessage}</div>}
 
             <div className="buttons">
+<<<<<<< HEAD
                 <button onClick={handleStart} disabled={tracking}>
                     Start
                 </button>
@@ -141,6 +197,20 @@ const Exercise = () => {
                             alt="Video Feed"
                         />
                     </div>
+=======
+                <button onClick={handleStart} disabled={tracking || loading}>
+                    {tracking ? "Tracking..." : "Start"}
+                </button>
+                <button onClick={handleStop} disabled={!tracking || loading}>
+                    Stop
+                </button>
+            </div>
+
+            {tracking && (
+                <div className="video-feed">
+                    <h2>Video Feed</h2>
+                    <img src={`http://localhost:5000/api/video_feed?exercise=${exercise}`} alt="Video Feed" />
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db
                 </div>
             )}
         </div>

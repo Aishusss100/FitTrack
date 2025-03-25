@@ -14,7 +14,7 @@ from exercise_tracker import (
 )
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000','http://192.168.126.149:3000','http://192.168.220.67:3000'])
 app.secret_key = 'your_secret_key'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
@@ -705,4 +705,8 @@ def check_goal_progress():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    app.run(host='0.0.0.0', port=5000, debug=True)
+>>>>>>> b9ac165236b0afc56d1a6480ce5dd58ffdf518db

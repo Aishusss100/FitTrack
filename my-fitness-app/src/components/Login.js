@@ -6,6 +6,7 @@ import './Login.css';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -15,24 +16,44 @@ const Login = () => {
         setMessage('');
         setIsLoading(true);
         
+
+        let response = null;
+        let errorMessage = 'Login failed. Please check your credentials.';
+
         try {
-            const response = await axios.post('http://localhost:5000/api/login', {
+            response = await axios.post('http://localhost:5000/api/login', {
                 username: username,
                 password: password
             }, {
-                withCredentials: true // Important for cookies/session
+                withCredentials: true
             });
+        } catch (localError) {
+            console.error('Login error (localhost):', localError);
+    
+            // Try network IP if localhost fails
+            try {
+                response = await axios.post('http://192.168.126.149:5000/api/login', {
+                    username: username,
+                    password: password
+                }, {
+                    withCredentials: true
+                });
+            } catch (networkError) {
+                console.error('Login error (network):', networkError);
+                errorMessage = networkError.response?.data?.message || errorMessage;
+            }
+        }
             
+        if (response) {
             console.log('Login response:', response.data);
             setMessage(response.data.message || 'Login successful');
             setIsLoading(false);
-            
+
             if (response.data.message === 'Login successful' || response.status === 200) {
                 navigate('/home');
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            setMessage(error.response?.data?.message || 'Login failed. Please check your credentials.');
+        } else {
+            setMessage(errorMessage);
             setIsLoading(false);
         }
     };
@@ -52,17 +73,26 @@ const Login = () => {
                         required
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group_password-group">
                     <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                    <div className="password-wrapper">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button 
+                            type="button" 
+                            className="toggle-password" 
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? '🙈  ' : '👁️'}
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" disabled={isLoading}>
+                <button type="submit" className="toggle-submit"  disabled={isLoading}>
                     {isLoading ? 'Logging in...' : 'Login'}
                 </button>
             </form>
