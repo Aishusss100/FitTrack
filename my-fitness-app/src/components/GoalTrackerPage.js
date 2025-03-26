@@ -38,24 +38,40 @@ const GoalTrackerPage = () => {
         // Fetch active goals (is_achieved = 0)
         const activeGoalsResponse = await axios.get('http://localhost:5000/api/get_goals?is_achieved=0', { withCredentials: true });
         const activeGoalsList = activeGoalsResponse.data;
-        setActiveGoals(activeGoalsList);
-
-        // Fetch progress for each active goal
-        const progressPromises = activeGoalsList.map(goal => 
-          axios.get(`http://localhost:5000/api/check_goal_progress?goal_id=${goal.id}`, { withCredentials: true })
-        );
         
-        const progressResponses = await Promise.all(progressPromises);
-        const progressMap = progressResponses.reduce((acc, response) => {
-          acc[response.data.goal_id] = response.data;
-          return acc;
-        }, {});
+        // Fetch achieved goals
+        const achievedGoalsResponse = await axios.get('http://localhost:5000/api/get_achieved_goals', { withCredentials: true });
+        const achievedGoalsList = achievedGoalsResponse.data;
         
-        setGoalProgress(progressMap);
+        // Fetch progress for each active goal and check if any have been achieved
+        const progressPromises = activeGoalsList.map(async goal => {
+          const progressResponse = await axios.get(`http://localhost:5000/api/check_goal_progress?goal_id=${goal.id}`, { withCredentials: true });
+          return { goal, progress: progressResponse.data };
+        });
+        
+        const progressResults = await Promise.all(progressPromises);
+        
+        // Separate active and achieved goals
+        const newActiveGoals = [];
+        const newGoalProgress = {};
 
-        // Fetch achieved goals (is_achieved = 1)
-        const achievedGoalsResponse = await axios.get('http://localhost:5000/api/get_goals?is_achieved=1', { withCredentials: true });
-        setAchievedGoals(achievedGoalsResponse.data);
+        progressResults.forEach(({ goal, progress }) => {
+          newGoalProgress[goal.id] = progress;
+          
+          if (progress.is_achieved) {
+            // Add to achieved goals in the backend
+            axios.post('http://localhost:5000/api/update_goal_status', {
+              id: goal.id,
+              is_achieved: 1
+            }, { withCredentials: true });
+          } else {
+            newActiveGoals.push(goal);
+          }
+        });
+
+        setActiveGoals(newActiveGoals);
+        setAchievedGoals(achievedGoalsList);
+        setGoalProgress(newGoalProgress);
 
         // Fetch list of exercises
         const exercisesResponse = await axios.get('http://localhost:5000/api/get_exercises', { withCredentials: true });
@@ -78,7 +94,7 @@ const GoalTrackerPage = () => {
   }, []);
 
   const handleCreateGoal = async () => {
-    // Validation checks
+    // Validation checks (same as before)
     if (!newGoal.exercise_name) {
       alert("Please select an exercise");
       return;
@@ -106,7 +122,7 @@ const GoalTrackerPage = () => {
         target_duration: parseInt(newGoal.target_duration)
       }, { withCredentials: true });
       
-      // Refresh goals after creating
+      // Refresh active goals
       const activeGoalsResponse = await axios.get('http://localhost:5000/api/get_goals?is_achieved=0', { withCredentials: true });
       setActiveGoals(activeGoalsResponse.data);
 
@@ -125,26 +141,13 @@ const GoalTrackerPage = () => {
     }
   };
 
-  const handleDeleteGoal = async (goalId) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/delete_goal?id=${goalId}`, { withCredentials: true });
-      
-      // Remove goal from active and achieved lists
-      setActiveGoals(activeGoals.filter(goal => goal.id !== goalId));
-      setAchievedGoals(achievedGoals.filter(goal => goal.id !== goalId));
-    } catch (err) {
-      console.error("Error deleting goal:", err);
-      alert("Failed to delete goal.");
-    }
-  };
-
   if (loading) {
     return <p>Loading...</p>;
   }
 
   return (
     <div className="goal-tracking-container">
-      {/* Left Section: Create New Goal */}
+      {/* Create New Goal Section */}
       <div className="set-goals-section">
         <h2>Create a New Goal</h2>
         <form className="add-goal-form">
@@ -192,7 +195,7 @@ const GoalTrackerPage = () => {
         </form>
       </div>
 
-      {/* Right Section: Active & Achieved Goals */}
+      {/* Goal Columns Section */}
       <div className="goal-columns">
         {/* Active Goals */}
         <div className="active-goals-container">
@@ -211,9 +214,8 @@ const GoalTrackerPage = () => {
                     <p>{progress.current_reps || 0} / {goal.target_reps} reps</p>
                   </div>
                   <p>Days to Complete: {goal.days_to_complete}</p>
-                  <p>Start Date: {progress.start_date}</p>
+                  <p>Start Date: {goal.created_at}</p>
                   <p>End Date: {progress.end_date}</p>
-                  <button onClick={() => handleDeleteGoal(goal.id)}>Delete</button>
                 </div>
               );
             })
@@ -226,22 +228,17 @@ const GoalTrackerPage = () => {
         <div className="achieved-goals-container">
           <h2>Achieved Goals</h2>
           {achievedGoals.length > 0 ? (
-            achievedGoals.map(goal => {
-              const progress = goalProgress[goal.id] || {};
-              return (
-                <div key={goal.id} className="goal-card">
-                  <h3>{goal.exercise_name}</h3>
-                  <div>
-                    <p>Total Reps: {goal.target_reps}</p>
-                    <p>Total Duration: {goal.target_duration} seconds</p>
-                  </div>
-                  <p>Days to Complete: {goal.days_to_complete}</p>
-                  <p>Start Date: {progress.start_date}</p>
-                  <p>Completed Date: {progress.end_date}</p>
-                  <button onClick={() => handleDeleteGoal(goal.id)}>Delete</button>
+            achievedGoals.map(goal => (
+              <div key={goal.id} className="goal-card">
+                <h3>{goal.exercise_name}</h3>
+                <div>
+                  <p>Total Reps: {goal.target_reps}</p>
+                  <p>Total Duration: {goal.target_duration} seconds</p>
                 </div>
-              );
-            })
+                <p>Days to Complete: {goal.days_to_complete}</p>
+                <p>Start Date: {goal.created_at}</p>
+              </div>
+            ))
           ) : (
             <p className="empty-goals-message">No achieved goals to display.</p>
           )}

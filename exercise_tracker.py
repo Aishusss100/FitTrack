@@ -226,8 +226,13 @@ def generate_video_frames():
                     # Announce when the target is achieved
                     if target_achieved:
                         announce_target_achieved()
-                        exercise_started = False   # Stop exercise tracking
-                        target_achieved = False  # Prevent repeated announcements 
+                        exercise_started = False  # Stop exercise tracking
+                        target_achieved = False  # Prevent repeated announcements
+
+                        # Call the stop_exercise() function
+                        stop_result = stop_exercise()  # Capture the return value if needed for further handling
+                        print(stop_result)  # Optionally print the result for debugging
+
 
                 except Exception as e:
                     print(f"Error processing frame: {e}")
@@ -250,9 +255,9 @@ def generate_video_frames():
                             (60, 60), 
                             cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
 
-                if target_achieved:
-                    cv2.putText(image, 'Target Achieved!', (15, 80), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+                # if target_achieved:
+                #     cv2.putText(image, 'Target Achieved!', (15, 80), 
+                #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
                 # Render landmarks
                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,

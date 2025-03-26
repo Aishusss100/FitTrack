@@ -676,7 +676,7 @@ def check_goal_progress():
         duration_progress = min((total_duration / target_duration) * 100, 100) if target_duration > 0 else 0
         
         # Determine if goal is achieved
-        is_achieved = reps_progress >= 100 and duration_progress >= 100
+        is_achieved = reps_progress >= 100 
         
         # If goal is achieved, update the goal status
         if is_achieved:
@@ -708,7 +708,41 @@ def check_goal_progress():
     finally:
         conn.close()
 
+@app.route('/api/get_achieved_goals', methods=['GET'])
+def get_achieved_goals():
+    if 'username' not in session:
+        return jsonify({'message': 'User not logged in'}), 401
 
+    username = session['username']
+
+    conn = sqlite3.connect('exercise_progress_with_duration.db')
+    c = conn.cursor()
+    try:
+        query = '''
+            SELECT id, exercise_name, target_reps, target_duration, days_to_complete, created_at
+            FROM user_goals
+            WHERE username = ? AND is_achieved = 1
+        '''
+        c.execute(query, (username,))
+        goals = c.fetchall()
+
+        result = [
+            {
+                'id': goal[0],
+                'exercise_name': goal[1],
+                'target_reps': goal[2],
+                'target_duration': goal[3],
+                'days_to_complete': goal[4],
+                'created_at': goal[5],
+            }
+            for goal in goals
+        ]
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error fetching achieved goals: {e}")
+        return jsonify({'message': 'Failed to fetch achieved goals'}), 500
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
     app.run(debug=True)

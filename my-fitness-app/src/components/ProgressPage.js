@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 import "./ProgressPage.css";
+
+// Register Chart.js components
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
 const ProgressPage = () => {
   const [exerciseList, setExerciseList] = useState([]);
@@ -53,21 +66,45 @@ const ProgressPage = () => {
     fetchProgressData();
   }, [viewType, selectedExercise]);
 
-  // Function to determine progress status
-  const getProgressStatus = (current, previous) => {
-    if (!previous) return "🆕 First Entry"; // No previous data
+  const chartData = {
+    labels: progressData.map((entry) => entry.date),
+    datasets: [
+      {
+        label: "Reps",
+        data: progressData.map((entry) => entry.reps),
+        borderColor: "rgba(75,192,192,1)",
+        backgroundColor: "rgba(75,192,192,0.2)",
+        fill: true,
+      },
+      {
+        label: "Duration (s)",
+        data: progressData.map((entry) => entry.duration),
+        borderColor: "rgba(153,102,255,1)",
+        backgroundColor: "rgba(153,102,255,0.2)",
+        fill: true,
+      },
+      {
+        label: "Efficiency",
+        data: progressData.map((entry) => entry.reps / entry.duration),
+        borderColor: "rgba(255,206,86,1)",
+        backgroundColor: "rgba(255,206,86,0.2)",
+        fill: true,
+      },
+    ],
+  };
 
-    const currentEfficiency = current.reps / current.duration;
-    const previousEfficiency = previous.reps / previous.duration;
-
-    if (currentEfficiency > previousEfficiency) return "🟢 Improved";
-    if (currentEfficiency < previousEfficiency) return "🔴 Needs Improvement";
-    return "🟡 No Change";
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
   };
 
   return (
     <div className="progress-page">
-      {/* Exercise Selector */}
       <div className="exercise-selector">
         <label htmlFor="exercise">Select Exercise:</label>
         <select
@@ -83,44 +120,40 @@ const ProgressPage = () => {
         </select>
       </div>
 
-      {/* View Selector */}
       <div className="view-selector">
-        <button className={viewType === "daily" ? "active" : ""} onClick={() => setViewType("daily")}>Daily</button>
-        <button className={viewType === "weekly" ? "active" : ""} onClick={() => setViewType("weekly")}>Weekly</button>
-        <button className={viewType === "monthly" ? "active" : ""} onClick={() => setViewType("monthly")}>Monthly</button>
+        <button
+          className={viewType === "daily" ? "active" : ""}
+          onClick={() => setViewType("daily")}
+        >
+          Daily
+        </button>
+        <button
+          className={viewType === "weekly" ? "active" : ""}
+          onClick={() => setViewType("weekly")}
+        >
+          Weekly
+        </button>
+        <button
+          className={viewType === "monthly" ? "active" : ""}
+          onClick={() => setViewType("monthly")}
+        >
+          Monthly
+        </button>
       </div>
 
-      {/* Loading Indicator */}
       {isLoading && <div className="loading-message">Loading...</div>}
-
-      {/* Error Messages */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {/* Progress Data */}
       {!isLoading && progressData.length > 0 && (
-        <div className="progress-list">
-          {progressData.map((entry, index) => {
-            const previousEntry = index > 0 ? progressData[index - 1] : null;
-            const progressStatus = viewType !== "daily" ? getProgressStatus(entry, previousEntry) : null;
-
-            return (
-              <div key={index} className="progress-item">
-                <p><strong>Date:</strong> {entry.date}</p>
-                <p><strong>Reps:</strong> {entry.reps}</p>
-                <p><strong>Duration:</strong> {(entry.duration / 60).toFixed(2)} mins</p>
-                <p><strong>Efficiency:</strong> {(entry.reps / entry.duration).toFixed(2)}</p>
-                {viewType !== "daily" && (
-                  <p className={`progress-status ${progressStatus.includes("Improved") ? "improved" : progressStatus.includes("Needs") ? "declined" : "no-change"}`}>
-                    <strong>Progress:</strong> {progressStatus}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+        <div style={{ width: "100%", height: "400px" }}>
+          <Line
+            key={selectedExercise + viewType} // Forces rerender on state changes
+            data={chartData}
+            options={chartOptions}
+          />
         </div>
       )}
 
-      {/* No Data Message */}
       {!isLoading && progressData.length === 0 && !errorMessage && (
         <div className="no-data-message">No progress data available for this selection.</div>
       )}

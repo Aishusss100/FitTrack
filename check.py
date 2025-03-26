@@ -1,19 +1,24 @@
 import sqlite3
 
-def drop_user_goals_table():
-    conn = sqlite3.connect('exercise_progress_with_duration.db')
-    cursor = conn.cursor()
-    try:
-        cursor.execute('''
-            DROP TABLE IF EXISTS user_goals;
-        ''')
-        conn.commit()
-        print("Table 'user_goals' dropped successfully!")
-    except Exception as e:
-        print(f"Error dropping table: {e}")
-    finally:
-        conn.close()
+def fetch_user_goals():
+    conn = sqlite3.connect('exercise_progress_with_duration.db')  # Connect to the database
+    c = conn.cursor()  # Create a cursor object
 
-# Run the function
-if __name__ == "__main__":
-    drop_user_goals_table()
+    try:
+        # Execute a query to fetch all the contents of the table
+        c.execute('SELECT * FROM user_goals')
+        rows = c.fetchall()  # Fetch all rows from the executed query
+
+        if rows:
+            print("Contents of the user_goals table:")
+            for row in rows:
+                print(row)
+        else:
+            print("The user_goals table is empty.")
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()  # Close the database connection
+
+# Call the function
+fetch_user_goals()

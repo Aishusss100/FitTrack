@@ -11,12 +11,20 @@ body {
 }
 
 .login-container {
-    background: rgba(255, 255, 255, 0.9); /* Slight transparency for better text visibility */
-    padding: 40px 30px;
+    background: rgba(255, 255, 255, 0.9); /* Slight transparency */
+    padding: 50px 40px; /* Increased padding for more space */
     border-radius: 20px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     text-align: center;
-    width: 400px;
+    width: 450px; /* Increased width */
+    animation: fadeIn 0.8s ease-out; /* Apply fade-in animation */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect: Slight lift */
+.login-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
 }
 
 .login-container h1 {
@@ -25,6 +33,7 @@ body {
     color: #4a4a4a;
     font-weight: bold;
 }
+
 
 .form-group {
     margin-bottom: 20px;
@@ -40,7 +49,7 @@ body {
 }
 
 .form-group input {
-    width: 87%;
+    width: 100%; /* Increased width for the username box */
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 15px;
@@ -48,6 +57,17 @@ body {
     transition: border-color 0.3s, box-shadow 0.3s;
     padding-right: 40px;
 }
+
+.password-wrapper input {
+    width: 100%; /* Same as the username field */
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    padding-right: 40px;
+}
+
 
 .form-group input:focus {
     border-color: #007bff;
@@ -75,7 +95,7 @@ body {
     align-items: center;
 }
 
-.password-wrapper input {
+/* .password-wrapper input {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
@@ -83,7 +103,7 @@ body {
     font-size: 16px;
     transition: border-color 0.3s, box-shadow 0.3s;
     padding-right: 40px;
-}
+} */
 
 .password-wrapper input:focus {
     border-color: #007bff;
@@ -117,7 +137,9 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s, transform 0.2s;
+    margin-bottom: 15px; /* Added spacing below the button */
 }
+
 
 .toggle-submit:hover {
 
