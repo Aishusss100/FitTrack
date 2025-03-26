@@ -105,6 +105,7 @@ const ProgressPage = () => {
 
   return (
     <div className="progress-page">
+      {/* Exercise Selector */}
       <div className="exercise-selector">
         <label htmlFor="exercise">Select Exercise:</label>
         <select
@@ -120,6 +121,7 @@ const ProgressPage = () => {
         </select>
       </div>
 
+      {/* View Selector */}
       <div className="view-selector">
         <button
           className={viewType === "daily" ? "active" : ""}
@@ -141,10 +143,34 @@ const ProgressPage = () => {
         </button>
       </div>
 
+      {/* Loading Indicator */}
       {isLoading && <div className="loading-message">Loading...</div>}
+
+      {/* Error Messages */}
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {!isLoading && progressData.length > 0 && (
+      {!isLoading && progressData.length > 0 && viewType === "daily" && (
+        <div className="daily-details">
+          {progressData.map((entry, index) => (
+            <div key={index} className="progress-item">
+              <p>
+                <strong>Date:</strong> {entry.date}
+              </p>
+              <p>
+                <strong>Reps:</strong> {entry.reps}
+              </p>
+              <p>
+                <strong>Duration:</strong> {(entry.duration / 60).toFixed(2)} mins
+              </p>
+              <p>
+                <strong>Efficiency:</strong> {(entry.reps / entry.duration).toFixed(2)}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isLoading && progressData.length > 0 && viewType !== "daily" && (
         <div style={{ width: "100%", height: "400px" }}>
           <Line
             key={selectedExercise + viewType} // Forces rerender on state changes

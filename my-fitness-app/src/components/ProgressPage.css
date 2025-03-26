@@ -26,8 +26,8 @@
     width: 480px;
     text-align: center;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    position: relative; /* Ensure it stays visible */
-    z-index: 10; /* Keep above other elements */
+    position: relative;
+    z-index: 10;
 }
 
 .exercise-selector:hover {
@@ -38,12 +38,12 @@
 /* 🎭 Styled Dropdown - Premium Look */
 select {
     width: 100%;
-    padding: 16px;
-    font-size: 18px;
+    padding: 20px;
+    font-size: 20px; /* Larger text size */
     font-weight: bold;
-    color: #f5e1c8; /* Lighter text color */
-    background: rgba(102,0,0,0.5); /* Lighter maroon background */
-    border: 3px solid #990000; /* Lighter maroon border */
+    color: #000000; /* Black text */
+    background: rgba(255, 255, 255, 0.85); /* Lighter background for better contrast */
+    border: 3px solid #990000;
     border-radius: 15px;
     outline: none;
     cursor: pointer;
@@ -51,13 +51,13 @@ select {
 }
 
 select:hover, select:focus {
-    border-color: #f5e1c8;
-    background: rgba(153,0,0,0.7);
+    border-color: #000000;
+    background: rgba(255, 255, 255, 0.95);
 }
 
 select option {
-    background-color: #660000; /* Lighter dark background for options */
-    color: #f5e1c8; /* Light text for options */
+    background-color: #ffffff; /* White background for options */
+    color: #000000; /* Black text for options */
 }
 
 /* 🔄 View Selector - Premium Buttons */
@@ -69,8 +69,8 @@ select option {
 }
 
 .view-selector button {
-    padding: 14px 30px;
-    font-size: 18px;
+    padding: 16px 35px; /* Increased padding for a better touch area */
+    font-size: 20px; /* Larger text size */
     border-radius: 14px;
     border: 3px solid #d4af7a;
     background: linear-gradient(135deg, #ffdde1, #d4af7a);
@@ -83,7 +83,7 @@ select option {
 
 .view-selector button.active {
     background: #8b0038;
-    color: rgb(88, 25, 25);
+    color: #ffffff; /* White text for better contrast */
 }
 
 .view-selector button:hover {
@@ -102,12 +102,11 @@ select option {
     max-width: 1100px;
     padding: 20px;
     border-radius: 16px;
-    background: rgba(164, 155, 155, 0.1);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.8); /* White background with transparency */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
     margin-top: 40px;
-    max-height: 500px; /* Set a maximum height */
-    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 /* Custom Scrollbar Styling */
@@ -116,7 +115,7 @@ select option {
 }
 
 .progress-list::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.2); /* Dark track */
+    background: rgba(200, 200, 200, 0.3); /* Lighter gray track */
 }
 
 .progress-list::-webkit-scrollbar-thumb {
@@ -125,12 +124,11 @@ select option {
 }
 
 /* 📊 Progress Item - Elegant & Centered */
-/* 📊 Progress Item - Elegant & Centered */
 .progress-item {
-    background: rgb(211, 196, 196); /* Changed background color to white */
+    background: #ffffff; /* White background for simplicity */
     border-radius: 20px;
-    padding: 25px;
-    width: 350px;
+    padding: 30px; /* Increased padding */
+    width: 400px; /* Slightly wider for better readability */
     text-align: center;
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -142,45 +140,44 @@ select option {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
-
 /* 📢 Progress Text - Bigger & Bolder */
 .progress-item p {
-    font-size: 20px;
+    font-size: 22px; /* Increased font size */
     font-weight: bold;
-    color: #120e0a;
+    color: #000000; /* Black text */
 }
 
 /* 🎖️ Progress Status Badge - More Visible */
 .progress-status {
     font-weight: bold;
-    font-size: 17px;
-    padding: 8px 14px;
-    border-radius: 10px;
+    font-size: 19px; /* Slightly larger font size */
+    padding: 10px 16px;
+    border-radius: 12px;
     display: inline-block;
     margin-top: 12px;
 }
 
 /* 🚦 Status Colors - Elegant & Bold */
 .progress-status.improved {
-    color: #031e0e;
+    color: #031e0e; /* Blackish-green text */
     background: rgba(21, 106, 56, 0.2);
 }
 
 .progress-status.no-change {
-    color: #e5b123;
+    color: #e5b123; /* Golden text */
     background: rgba(244, 197, 66, 0.2);
 }
 
 .progress-status.declined {
-    color: #47130d;
+    color: #47130d; /* Brownish-red text */
     background: rgba(90, 16, 16, 0.2);
 }
 
 /* ⚠️ Loading & Error Messages - Noticeable & Premium */
 .loading-message, .error-message, .no-data-message {
-    font-size: 22px;
+    font-size: 24px; /* Increased font size */
     font-weight: bold;
-    color: #f5e1c8;
+    color: #000000; /* Black text */
     margin-top: 25px;
 }
 
@@ -202,5 +199,47 @@ select option {
 
     .progress-item {
         width: 90%;
+    }
+}
+
+canvas {
+    background-color: white !important;
+    border-radius: 8px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .progress-page {
+        padding: 40px 20px;
+    }
+
+    .exercise-selector {
+        padding: 20px;
+    }
+
+    .progress-list {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .progress-item {
+        width: 90%;
+    }
+}
+
+/* Smaller Mobile Screens */
+@media (max-width: 480px) {
+    .progress-page {
+        padding: 30px 15px;
+    }
+
+    .exercise-selector {
+        padding: 15px;
+    }
+
+    select, .view-selector button {
+        font-size: 16px;
+        padding: 12px;
     }
 }
