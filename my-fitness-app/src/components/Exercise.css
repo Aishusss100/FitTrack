@@ -1,189 +1,311 @@
-/* Container for the entire page */
-.exercise-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background: #fff; /* Default background color */
-    transition: background-color 0.5s ease; /* Smooth transition for background color */
-    min-height: 100vh; /* Full page height */
-    font-family: 'Poppins', sans-serif; /* Modern font for style */
+/* Global reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Background color when target is set */
-.target-set {
-    background: linear-gradient(135deg, #d1f4e8, #b8e8d3); /* Light green gradient */
-    transition: background-color 0.5s ease; /* Smooth transition */
+body {
+    background-color: #f4f4f8;
+    font-family: 'Poppins', 'Arial', sans-serif;
+    line-height: 1.6;
+}
+
+/* Container color states */
+.exercise-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    transition: background-color 0.5s ease;
+}
+
+.exercise-container.default {
+    background: linear-gradient(135deg, #f5e6e8, #d5b4b4);
+}
+
+.exercise-container.target-set {
+    background: linear-gradient(135deg, #e0d3d3, #a76f6f);
+}
+
+.exercise-container.tracking {
+    background: linear-gradient(135deg, #f4d3b5, #c97c5d);
+}
+
+/* Enhanced grid layout */
+.exercise-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    width: 100%;
+    max-width: 1400px;
+    background-color: white;
+    border-radius: 25px;
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.1), 
+        0 5px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    min-height: 75vh;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Left column styling */
+.exercise-left-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 50px;
+    background: linear-gradient(135deg, #800000 0%, #660000 100%);
+    color: white;
+}
+
+.exercise-left-column h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(to right, #ffffff, #e0e0e0);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Instructions box styling */
 .instructions {
     width: 100%;
-    max-width: 600px;
-    background: linear-gradient(135deg, #7e5959, #aa6f6f); /* Subtle gradient */
+    background: rgba(255, 255, 255, 0.1);
     padding: 25px;
     border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
-    color: #fff; /* White text for contrast */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .instructions h2 {
-    margin-top: 0;
-    font-size: 24px; /* Larger font for headlines */
-    text-align: center; /* Center-align header */
-    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    text-align: center;
+    color: #ffffff;
+    position: relative;
+}
+
+.instructions h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: white;
 }
 
 .instructions p {
     margin: 10px 0;
     font-size: 16px;
-    line-height: 1.5; /* Better readability */
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    padding-left: 15px;
+    position: relative;
 }
 
-/* Target input styling */
-.target-input {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center; /* Center-align input */
+.instructions p::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: white;
 }
 
-.target-input input {
-    width: 200px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: box-shadow 0.3s ease;
-}
-
-.target-input input:focus {
-    box-shadow: 0 0 10px #7e5959; /* Glow effect on focus */
-    outline: none;
-}
-
-/* Button container styling */
-.buttons {
-    display: flex;
-    gap: 15px; /* Increased spacing between buttons */
-    justify-content: center;
-}
-
-.buttons button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    background: #7e5959; /* Button background */
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.buttons button:hover {
-    background: #aa6f6f; /* Lighter shade on hover */
-    transform: scale(1.05); /* Slight zoom on hover */
-}
-
-.buttons button:active {
-    transform: scale(0.95); /* Click effect */
-}
-
-/* Video feed styling */
-.video-feed {
-    width: 100%;
-    max-width: 600px;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
-    border: 3px solid #7e5959; /* Add border for distinction */
-}
-
-.video-feed::after {
-    content: ""; /* Decorative border effect */
-    display: block;
-    margin-top: 10px;
-    width: 80%;
-    height: 5px;
-    background: linear-gradient(90deg, #7e5959, #aa6f6f);
-    border-radius: 10px;
-    margin: 15px auto;
-}
-
-/* Error message styling */
-.error-message {
-    color: red;
-    background-color: #ffe0e0;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-    text-align: center;
-    font-size: 14px;
-}
-/* Stopwatch styling */
-
-.stopwatch {
-    text-align: center; /* Center the text */
-    font-size: 10px; /* Smaller font size for compactness */
-    margin: 8px 0; /* Reduced vertical spacing */
-    color: #ffffff; /* White text for contrast */
-    background-color: #4f1e03; /* Brownish background for visibility */
-    padding: 3px 8px; /* Very small padding for a slimmer box */
-    border-radius: 4px; /* Slightly less rounded corners */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    width: 40%; /* Narrower width for a compact layout */
-    margin-left: auto;
-    margin-right: auto;
-    font-weight: bold; /* Bold text for readability */
-    line-height: 1; /* Tighter line spacing */
-}
-
-/* Container for Video Feed and Angle Box */
-.video-and-angle {
-    display: flex; /* Align video feed and angle box side-by-side */
-    gap: 20px; /* Space between the video feed and angle box */
-    width: 100%;
-    justify-content: center; /* Center align the container */
-}
-
-/* Angle Box Styling */
-.angle-box {
-    width: 30%; /* Adjust width for balance */
-    background: linear-gradient(135deg, #f7e5e5, #f2d1d1); /* Light red gradient */
-    border: 2px solid #7e5959; /* Add a border for distinction */
-    border-radius: 15px; /* Rounded corners for smooth look */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Depth shadow */
-    padding: 20px;
-    text-align: center; /* Center-align text */
+/* Right column styling */
+.exercise-right-column {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 50px;
 }
 
-/* Angle Title Styling */
-.angle-box h2 {
+/* Target input styling */
+.target-input {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.target-input label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.target-input input {
+    width: 200px;
+    padding: 12px;
+    border: 2px solid #800000;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.target-input input:focus {
+    border-color: #660000;
+    box-shadow: 0 0 15px rgba(128, 0, 0, 0.2);
+}
+
+.target-input button {
+    padding: 12px 25px;
+    background-color: #800000;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.target-input button:hover {
+    background-color: #660000;
+}
+
+/* Buttons styling */
+.buttons {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.buttons button {
+    padding: 12px 30px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.buttons button:first-child {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.buttons button:last-child {
+    background-color: #f44336;
+    color: white;
+}
+
+.buttons button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.buttons button:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Error message styling */
+.error-message {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Stopwatch styling */
+.stopwatch {
+    background-color: #333;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+/* Video feed styling */
+.video-and-angle {
+    width: 100%;
+    max-width: 600px;
+}
+
+.video-feed {
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.video-feed h2 {
+    background-color: #800000;
+    color: white;
+    padding: 10px;
+    text-align: center;
     margin: 0;
-    font-size: 24px; /* Slightly larger for prominence */
-    color: #333; /* Dark text color */
 }
 
-/* Angle Value Styling */
-.angle-box p {
-    margin: 10px 0 0; /* Space above the value */
-    font-size: 36px; /* Large font for angle */
-    font-weight: bold;
-    color: #7e5959; /* Use a consistent color theme */
+.video-feed img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
-/* Enhance spacing for smaller screens */
+/* Responsive design */
+@media (max-width: 1200px) {
+    .exercise-grid {
+        max-width: 95%;
+        gap: 20px;
+    }
+}
+
 @media (max-width: 768px) {
-    .video-and-angle {
-        flex-direction: column; /* Stack video feed and angle box vertically */
+    .exercise-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+        min-height: auto;
     }
-    .angle-box {
-        width: 100%; /* Use full width for smaller devices */
+
+    .exercise-left-column,
+    .exercise-right-column {
+        padding: 30px;
+    }
+
+    .exercise-left-column h1 {
+        font-size: 2rem;
+    }
+
+    .target-input {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .target-input input,
+    .target-input button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .buttons button {
+        width: 100%;
     }
 }
-
-

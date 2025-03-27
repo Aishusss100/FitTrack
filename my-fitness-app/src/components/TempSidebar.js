@@ -5,7 +5,7 @@ import "./Sidebar.css";
 const Sidebar = ({ onClose }) => {
   const [username, setUsername] = useState(""); // State to hold the username
   const [error, setError] = useState(null); // State to handle any errors
-
+  
   // Fetch username from the backend
   useEffect(() => {
     const fetchUsername = async () => {
@@ -14,11 +14,11 @@ const Sidebar = ({ onClose }) => {
           method: "GET",
           credentials: "include", // Include cookies for session
         });
-
+        
         if (!response.ok) {
           throw new Error("Failed to fetch username");
         }
-
+        
         const data = await response.json();
         setUsername(data.username); // Update username state
       } catch (err) {
@@ -26,10 +26,10 @@ const Sidebar = ({ onClose }) => {
         setError("User not logged in"); // Set error message if any
       }
     };
-
+    
     fetchUsername();
   }, []); // Run only on component mount
-
+  
   return (
     <div className="sidebar">
       {/* Sidebar Header */}
@@ -64,17 +64,10 @@ const Sidebar = ({ onClose }) => {
         </NavLink>
         <NavLink
           to="/goals"
-          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")} // New Goal Tracker link
-          onClick={onClose}
-        >
-          Goal Tracker
-        </NavLink>
-        <NavLink
-          to="/feedback"
           className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
           onClick={onClose}
         >
-          Feedback
+          Goal Tracker
         </NavLink>
       </nav>
     </div>

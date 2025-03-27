@@ -12,7 +12,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  padding-top: 80px;
+  padding-top: 120px;
 }
 
 /* Main Layout */
@@ -81,15 +81,87 @@ body {
   text-transform: uppercase;
   transition: all 0.3s ease-in-out;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.add-goal-form button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.4s ease;
+}
+
+.add-goal-form button:hover::before {
+  left: 100%;
 }
 
 .add-goal-form button:hover {
-  background: #f5e1c8;
   transform: translateY(-4px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
-/* Right Section: Active & Achieved Goals */
+.add-goal-form button:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Goal Action Buttons Styling */
+.goal-actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.navigate-to-exercise,
+.delete-goal {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.navigate-to-exercise {
+  background: linear-gradient(135deg, #4CAF50, #81C784);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navigate-to-exercise:hover {
+  background: linear-gradient(135deg, #45a049, #66bb6a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.delete-goal {
+  background: linear-gradient(135deg, #f44336, #ef5350);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.delete-goal:hover {
+  background: linear-gradient(135deg, #d32f2f, #f44336);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Goal Columns */
 .goal-columns {
   display: flex;
   flex-direction: column;
@@ -97,7 +169,6 @@ body {
   gap: 30px;
 }
 
-/* Active & Achieved Goals Containers */
 .active-goals-container,
 .achieved-goals-container {
   background: rgba(128, 0, 0, 0.3);
@@ -108,7 +179,6 @@ body {
   overflow-y: auto;
 }
 
-/* Stylish Scrollbar */
 .active-goals-container::-webkit-scrollbar,
 .achieved-goals-container::-webkit-scrollbar {
   width: 6px;
@@ -125,7 +195,6 @@ body {
   background: #f5e1c8;
 }
 
-/* Goal Cards - Glassmorphism Style */
 .goal-card {
   background: rgba(128, 0, 0, 0.7);
   padding: 22px;
@@ -159,7 +228,6 @@ body {
   line-height: 1.6;
 }
 
-/* Progress Bar */
 .progress-container {
   width: 100%;
   height: 16px;
@@ -175,7 +243,6 @@ body {
   transition: width 0.5s ease-in-out;
 }
 
-/* Empty State Styling */
 .empty-goals-message {
   text-align: center;
   padding: 40px 20px;
@@ -221,5 +288,11 @@ body {
   .add-goal-form button {
     padding: 14px;
     font-size: 16px;
+  }
+
+  .navigate-to-exercise,
+  .delete-goal {
+    padding: 10px 12px;
+    font-size: 12px;
   }
 }
