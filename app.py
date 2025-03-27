@@ -744,5 +744,38 @@ def get_achieved_goals():
     finally:
         conn.close()
 
+
+@app.route('/api/get_pending_goals_count', methods=['GET'])
+def get_pending_goals_count():
+    if 'username' not in session:
+        return jsonify({'message': 'User not logged in'}), 401
+
+    username = session['username']
+    conn = sqlite3.connect('exercise_progress_with_duration.db')
+    c = conn.cursor()
+    
+    try:
+        # Count pending goals that are not achieved and not expired
+        c.execute('''
+            SELECT COUNT(*) 
+            FROM user_goals 
+            WHERE username = ? 
+            AND is_achieved = 0 
+            AND date(created_at, '+' || days_to_complete || ' days') >= date('now')
+        ''', (username,))
+        
+        pending_goals_count = c.fetchone()[0]
+        
+        return jsonify({
+            'pending_goals_count': pending_goals_count
+        })
+    
+    except Exception as e:
+        print(f"Error fetching pending goals count: {e}")
+        return jsonify({'message': 'Failed to fetch pending goals count'}), 500
+    finally:
+        conn.close()
+
+        
 if __name__ == "__main__":
     app.run(debug=True)

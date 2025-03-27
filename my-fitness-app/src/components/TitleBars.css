@@ -26,6 +26,35 @@
     color: white !important; /* Force white text across all children */ 
 }
 
+/* Tooltip Container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  opacity: 0;
+  width: 200px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1100;
+  bottom: 125%; /* Adjust if the tooltip isn't aligning */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.3s ease-in-out;
+  white-space: nowrap;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
 /* Button Group Styling */
 .button-group {     
     display: flex;     
@@ -84,27 +113,58 @@
 
 /* Streak Display Styling */
 .streak-display {
-    display: flex; /* Align icon and number horizontally */
-    align-items: center; /* Center vertically */
-    gap: 5px; /* Space between icon and number */
+    display: flex;
+    align-items: center;
+    gap: 5px;
     margin-left: 10px;
-    background-color: #ffe6e6; /* Light red background */
-    color: #ff4500; /* Fiery orange text */
-    border-radius: 20px; /* Fully rounded corners to match button styling */
-    padding: 5px 10px; /* Larger padding for consistency */
-    font-size: 1rem; /* Slightly larger text */
+    background-color: #ffe6e6;
+    color: #ff4500;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 1rem;
     font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a soft shadow for depth */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
 
 /* Streak Icon Styling */
 .streak-icon {
-    font-size: 1.2rem; /* Slightly larger icon */
+    font-size: 1.2rem;
 }
 
 /* Streak Count Styling */
 .streak-count {
-    font-size: 1rem; /* Match the size of the streak text */
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+/* Pending Goals Display Styling */
+.pending-goals-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 10px;
+    background-color: #ffe6e6;
+    color: #ff4500;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.pending-goals-display:hover {
+    transform: scale(1.05);
+}
+
+.pending-goals-icon {
+    font-size: 1.2rem;
+}
+
+.pending-goals-count {
+    font-size: 1rem;
     font-weight: bold;
 }
 
