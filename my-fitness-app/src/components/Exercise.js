@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./Exercise.css";
 
+// Import exercise GIFs
+import bicepCurlRightGif from "../assets/One-Arm-Biceps-Curl-right.gif";
+import bicepCurlLeftGif from "../assets/One-Arm-Biceps-Curl-left.gif";
+import lateralRaiseRightGif from "../assets/lateral raise right.gif";
+import lateralRaiseLeftGif from "../assets/lateral raise left.gif";
+import frontRaiseRightGif from "../assets/how-to-do-dumbbell-front-raise.gif";
+import overheadPressRightGif from "../assets/overhead press right.gif"; 
+import singleArmDumbbellGif from "../assets/single arm dumbell.gif"
 const Exercise = () => {
     const { exercise } = useParams();
     const COLORS = {
@@ -17,6 +25,35 @@ const Exercise = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerId, setTimerId] = useState(null);
+
+    // Function to get the appropriate GIF based on exercise type
+    const getExerciseGif = () => {
+        switch (exercise) {
+            case "bicep_curl_right":
+                return bicepCurlRightGif;
+            case "bicep_curl_left":
+                return bicepCurlLeftGif;
+            case "lateral_raise_right":
+                return lateralRaiseRightGif;
+            case "lateral_raise_left":
+                return lateralRaiseLeftGif;
+            case "front_raise_right":
+                return frontRaiseRightGif;
+            case "front_raise_left":
+                return frontRaiseRightGif; // Use right GIF and mirror it
+            case "overhead_press_right":
+                return overheadPressRightGif;
+            case "overhead_press_left":
+                return overheadPressRightGif; // Use right GIF and mirror it
+            case "single_arm_dumbbell_right":
+                return singleArmDumbbellGif; // Mirror for right
+            case "single_arm_dumbbell_left":
+                return singleArmDumbbellGif; // Original for left
+                
+            default:
+                return null;
+        }
+    };
 
     const formatExerciseTitle = (exercise) => {
         return exercise.replace(/_/g, " ").replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
@@ -99,6 +136,9 @@ const Exercise = () => {
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
 
+    // Determine if we should show the exercise GIF
+    const exerciseGif = getExerciseGif();
+
     return (
         <div className={`exercise-container ${containerState}`}>
             <div className="exercise-grid">
@@ -111,6 +151,21 @@ const Exercise = () => {
                         <p>3. Ensure there is sufficient lighting in the room.</p>
                         <p>4. Wear comfortable clothing that allows you to move freely.</p>
                     </div>
+                    
+                    {/* Display the exercise GIF if available */}
+                    {exerciseGif && (
+                        <div className="exercise-demo">
+                            <h2>Exercise Demonstration</h2>
+                            <img 
+                                src={exerciseGif} 
+                                alt={`${formatExerciseTitle(exercise)} demonstration`} 
+                                className={`exercise-gif 
+                                    ${["lateral_raise_left", "lateral_raise_right", "front_raise_left", "front_raise_right", "overhead_press_left", "overhead_press_right","single_arm_dumbbell_left","single_arm_dumbbell_right"].includes(exercise) ? "lateral-raise" : ""} 
+                                    ${["front_raise_left", "overhead_press_left","single_arm_dumbbell_right"].includes(exercise) ? "mirrored" : ""}`
+                                }
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="exercise-right-column">
@@ -120,7 +175,6 @@ const Exercise = () => {
                             type="text"
                             value={targetReps}
                             onChange={(e) => {
-                                // Only allow numbers and empty string
                                 const value = e.target.value;
                                 setTargetReps(value === '' ? '' : parseInt(value) || '');
                             }}
@@ -132,18 +186,8 @@ const Exercise = () => {
                     {errorMessage && <div className="error-message">{errorMessage}</div>}
 
                     <div className="buttons">
-                        <button 
-                            onClick={handleStart} 
-                            disabled={tracking}
-                        >
-                            Start
-                        </button>
-                        <button 
-                            onClick={handleStop} 
-                            disabled={!tracking}
-                        >
-                            Stop
-                        </button>
+                        <button onClick={handleStart} disabled={tracking}>Start</button>
+                        <button onClick={handleStop} disabled={!tracking}>Stop</button>
                     </div>
 
                     <div className="stopwatch">
@@ -154,10 +198,7 @@ const Exercise = () => {
                         <div className="video-and-angle">
                             <div className="video-feed">
                                 <h2>Video Feed</h2>
-                                <img
-                                    src={`http://localhost:5000/api/video_feed?exercise=${exercise}`}
-                                    alt="Video Feed"
-                                />
+                                <img src={`http://localhost:5000/api/video_feed?exercise=${exercise}`} alt="Video Feed" />
                             </div>
                         </div>
                     )}
