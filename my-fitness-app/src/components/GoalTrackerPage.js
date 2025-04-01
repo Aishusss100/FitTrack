@@ -17,7 +17,12 @@ const ProgressBar = ({ value, max = 100, color = "linear-gradient(to right, #d4a
     </div>
   );
 };
-
+const formatExerciseName = (name) => {
+  return name
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
 const GoalTrackerPage = () => {
   const [activeGoals, setActiveGoals] = useState([]);
   const [achievedGoals, setAchievedGoals] = useState([]);
@@ -189,7 +194,7 @@ const GoalTrackerPage = () => {
             <option value="">Select an exercise</option>
             {exercises.map((exercise, index) => (
               <option key={index} value={exercise}>
-                {exercise}
+                {formatExerciseName(exercise)}
               </option>
             ))}
           </select>
@@ -234,7 +239,7 @@ const GoalTrackerPage = () => {
               const progress = goalProgress[goal.id] || {};
               return (
                 <div key={goal.id} className="goal-card">
-                  <h3>{goal.exercise_name}</h3>
+                  <h3>{formatExerciseName(goal.exercise_name)}</h3>
                   <div>
                     <p>Reps Progress:</p>
                     <ProgressBar value={progress.reps_progress || 0} />
@@ -274,7 +279,7 @@ const GoalTrackerPage = () => {
           {achievedGoals.length > 0 ? (
             achievedGoals.map((goal) => (
               <div key={goal.id} className="goal-card">
-                <h3>{goal.exercise_name}</h3>
+                <h3>{formatExerciseName(goal.exercise_name)}</h3>
                 <div>
                   <p>Total Reps: {goal.target_reps}</p>
                   <p>Total Duration: {goal.target_duration} seconds</p>

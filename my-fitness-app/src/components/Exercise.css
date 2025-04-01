@@ -10,7 +10,7 @@ body {
     font-family: 'Poppins', 'Arial', sans-serif;
     line-height: 1.6;
     /* Add padding to the top of the body */
-    padding-top: 150px;
+    padding-top: 100px;
 }
 
 /* Container color states */
@@ -358,4 +358,102 @@ body {
 }
 .mirrored {
     transform: scaleX(-1);
+}
+
+/* Add these styles to your Exercise.css file */
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.section-header h3 {
+    margin: 0;
+}
+
+/* Toggle Button Styling */
+.detail-toggle-btn {
+    background: linear-gradient(135deg, #b22222, #800000);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.detail-toggle-btn:hover {
+    background: linear-gradient(135deg, #800000, #660000);
+    transform: scale(1.05);
+}
+
+.detail-toggle-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.detail-toggle-btn span {
+    transition: transform 0.3s ease;
+}
+
+/* Rotate arrow when toggled */
+.detail-toggle-btn.toggled span {
+    transform: rotate(180deg);
+}
+/* Enhanced Show Instructions Button */
+.instructions-toggle-btn {
+    background: linear-gradient(135deg, #8B0000, #A52A2A); /* Deep maroon gradient */
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 5px 12px rgba(139, 0, 0, 0.3);
+}
+
+/* Hover Effect */
+.instructions-toggle-btn:hover {
+    background: linear-gradient(135deg, #A52A2A, #B22222);
+    transform: scale(1.1);
+    box-shadow: 0 7px 18px rgba(165, 42, 42, 0.5);
+}
+
+/* Click Effect */
+.instructions-toggle-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 3px 8px rgba(139, 0, 0, 0.3);
+}
+
+/* Icon Animation */
+.instructions-toggle-btn span {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Rotate icon when toggled */
+.instructions-toggle-btn.toggled span {
+    transform: rotate(180deg);
+}
+
+.instruction-section {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.instruction-section:last-child {
+    border-bottom: none;
 }

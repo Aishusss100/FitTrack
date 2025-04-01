@@ -266,7 +266,7 @@ def check_posture(landmarks):
     # Define appropriate thresholds
     SHOULDER_THRESHOLD = 0.035
     HIP_THRESHOLD = 0.025
-    SIDEWAYS_ANGLE_THRESHOLD = 10  # Threshold in degrees for sideways leaning
+    SIDEWAYS_ANGLE_THRESHOLD = 7  # Threshold in degrees for sideways leaning
     FORWARD_SLOUCH_THRESHOLD = 0.15  # Distance threshold for forward slouching
     TORSO_THRESHOLD = 0.15
 
@@ -586,14 +586,7 @@ def generate_video_frames():
                             exercise_started = False  # Stop future iterations
                             target_achieved = False
                             # Call stop_exercise if it exists (wrap in try/except in case it doesn't)
-                            try:
-                                if callable(stop_exercise):
-                                    stop_result = stop_exercise()
-                                    print(stop_result)
-                            except NameError:
-                                print("stop_exercise function not defined")
-                        # Optionally print the result for debugging
-
+                            stop_result = stop_exercise()
 
                 except Exception as e:
                     print(f"Error processing frame: {e}")
