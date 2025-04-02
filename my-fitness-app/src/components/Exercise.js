@@ -207,8 +207,8 @@ const Exercise = () => {
                 ],
                 angleDetails: [
                     "Starting Position (Down): Arm nearly straight with angle > 160° between shoulder, elbow, and wrist",
-                    "End Position (Up): Arm bent with angle < 30° between shoulder, elbow, and wrist",
-                    "Rep Counted: When you move from the down position (>160°) to the up position (<30°) and back"
+                    "End Position (Up): Arm bent with angle < 40° between shoulder, elbow, and wrist",
+                    "Rep Counted: When you move from the down position (>160°) to the up position (<40°) and back"
                 ],
                 mistakes: [
                     "Rounding the back",

@@ -12,6 +12,13 @@ const Profile = () => {
     const [exercisePerformance, setExercisePerformance] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedData, setEditedData] = useState({
+        name: '',
+        date_of_birth: '',
+        email: ''
+    });
+    const [updateMessage, setUpdateMessage] = useState('');
 
     // List of all exercises to track
     const exercises = [
@@ -31,6 +38,11 @@ const Profile = () => {
                     withCredentials: true
                 });
                 setProfileData(profileResponse.data);
+                setEditedData({
+                    name: profileResponse.data.name || '',
+                    date_of_birth: profileResponse.data.date_of_birth || '',
+                    email: profileResponse.data.email || ''
+                });
 
                 // Fetch highest performance for each exercise
                 const performancePromises = exercises.map(async (exercise) => {
@@ -81,6 +93,55 @@ const Profile = () => {
         fetchProfileData();
     }, []);
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditedData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+        setEditedData({
+            name: profileData.name || '',
+            date_of_birth: profileData.date_of_birth || '',
+            email: profileData.email || ''
+        });
+        setUpdateMessage('');
+    };
+
+    const handleSave = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/update_profile', editedData, {
+                withCredentials: true
+            });
+            
+            if (response.data.success) {
+                setProfileData(prev => ({
+                    ...prev,
+                    name: editedData.name,
+                    date_of_birth: editedData.date_of_birth,
+                    email: editedData.email
+                }));
+                setIsEditing(false);
+                setUpdateMessage('Profile updated successfully!');
+                
+                // Clear the message after 3 seconds
+                setTimeout(() => {
+                    setUpdateMessage('');
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            setUpdateMessage('Failed to update profile. Please try again.');
+        }
+    };
+
     if (loading) {
         return (
             <div className="profile-container">
@@ -104,7 +165,20 @@ const Profile = () => {
             <h1 className="profile-title">My Profile</h1>
             
             <div className="personal-details">
-                <h2>Personal Information</h2>
+                <div className="details-header">
+                    <h2>Personal Information</h2>
+                    {!isEditing ? (
+                        <button className="edit-button" onClick={handleEdit}>Edit</button>
+                    ) : (
+                        <div className="edit-actions">
+                            <button className="save-button" onClick={handleSave}>Save</button>
+                            <button className="cancel-button" onClick={handleCancel}>Cancel</button>
+                        </div>
+                    )}
+                </div>
+                
+                {updateMessage && <div className="update-message">{updateMessage}</div>}
+                
                 <div className="profile-field">
                     <span className="field-label">Username:</span>
                     <span className="field-value">{profileData.username}</span>
@@ -112,17 +186,47 @@ const Profile = () => {
                 
                 <div className="profile-field">
                     <span className="field-label">Name:</span>
-                    <span className="field-value">{profileData.name || 'Not provided'}</span>
+                    {isEditing ? (
+                        <input 
+                            type="text" 
+                            name="name" 
+                            value={editedData.name} 
+                            onChange={handleInputChange} 
+                            className="edit-input"
+                        />
+                    ) : (
+                        <span className="field-value">{profileData.name || 'Not provided'}</span>
+                    )}
                 </div>
                 
                 <div className="profile-field">
                     <span className="field-label">Date of Birth:</span>
-                    <span className="field-value">{profileData.date_of_birth || 'Not provided'}</span>
+                    {isEditing ? (
+                        <input 
+                            type="date" 
+                            name="date_of_birth" 
+                            value={editedData.date_of_birth} 
+                            onChange={handleInputChange} 
+                            className="edit-input"
+                        />
+                    ) : (
+                        <span className="field-value">{profileData.date_of_birth || 'Not provided'}</span>
+                    )}
                 </div>
                 
                 <div className="profile-field">
                     <span className="field-label">Email:</span>
-                    <span className="field-value">{profileData.email || 'Not provided'}</span>
+                    {isEditing ? (
+                        <input 
+                            type="email" 
+                            name="email" 
+                            value={editedData.email} 
+                            onChange={handleInputChange} 
+                            className="edit-input"
+                        />
+                    ) : (
+                        <span className="field-value">{profileData.email || 'Not provided'}</span>
+                    )}
                 </div>
             </div>
 

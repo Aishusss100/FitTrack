@@ -44,8 +44,8 @@ exercise_started = False
 target_reps = 0
 target_achieved = False
 cap = None
-# Define a global username variable
-username = "default_user"  # This can be set via a function later if needed
+
+username = "default_user" 
 
 
 def init_exercise_tracker():
@@ -242,10 +242,7 @@ import time
 
 
 def check_posture(landmarks):
-    """
-    Improved posture check that detects forward bending, sideways leaning using angle measurements, and forward slouching
-    using the shoulder-to-hip distance, with adjusted thresholds to reduce false positives.
-    """
+    
     # Extract relevant landmarks for posture assessment
     left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
     right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
@@ -253,7 +250,7 @@ def check_posture(landmarks):
     right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
     nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
     
-    # Add neck approximation (midpoint between shoulders, slightly higher)
+    # Added neck approximation (midpoint between shoulders, slightly higher)
     neck_x = (left_shoulder.x + right_shoulder.x) / 2
     neck_y = ((left_shoulder.y + right_shoulder.y) / 2) - 0.03  # Slightly higher than shoulders
     
@@ -404,6 +401,7 @@ def generate_video_frames():
                 break
             else:
                 # Recolor image to RGB
+                
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 image.flags.writeable = False
 
@@ -577,8 +575,8 @@ def generate_video_frames():
                     # Announce when the target is achieved
                     if target_achieved:
                     # Display achievement on screen
-                        cv2.putText(image, 'Target Achieved!', (15, 170), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+                        # cv2.putText(image, 'Target Achieved!', (15, 170), 
+                        #         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
                     
                     # Only announce once and then stop tracking
                         if exercise_started:
@@ -871,9 +869,9 @@ def process_single_arm_dumbbell(landmarks, side):
     angle = calculate_angle(shoulder, elbow, wrist)
 
     # Dumbbell logic
-    if angle > 160:
+    if angle > 150:
         exercises[f'single_arm_dumbbell_{side.lower()}']['stage'] = "down"
-    if angle < 30 and exercises[f'single_arm_dumbbell_{side.lower()}']['stage'] == "down":
+    if angle < 40 and exercises[f'single_arm_dumbbell_{side.lower()}']['stage'] == "down":
         exercises[f'single_arm_dumbbell_{side.lower()}']['stage'] = "up"
         exercises[f'single_arm_dumbbell_{side.lower()}']['counter'] += 1
 

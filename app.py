@@ -776,6 +776,54 @@ def get_pending_goals_count():
     finally:
         conn.close()
 
+
+
+@app.route('/api/update_profile', methods=['POST'])
+def update_profile():
+    if 'username' not in session:
+        return jsonify({'message': 'User not logged in', 'success': False}), 401
+
+    username = session['username']
+    data = request.get_json()
+    
+    # Extract the updated fields
+    name = data.get('name', '')
+    date_of_birth = data.get('date_of_birth', '')
+    email = data.get('email', '')
+    
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    
+    try:
+        # Update the user profile
+        c.execute('''
+            UPDATE users 
+            SET name = ?, date_of_birth = ?, email = ? 
+            WHERE username = ?
+        ''', (name, date_of_birth, email, username))
+        conn.commit()
+        
+        # Check if the update was successful
+        if c.rowcount > 0:
+            return jsonify({
+                'message': 'Profile updated successfully!',
+                'success': True
+            })
+        else:
+            return jsonify({
+                'message': 'No changes were made or user not found.',
+                'success': False
+            }), 404
+            
+    except Exception as e:
+        print(f"Error updating profile: {e}")
+        return jsonify({
+            'message': 'Failed to update profile',
+            'success': False
+        }), 500
+        
+    finally:
+        conn.close()
         
 if __name__ == "__main__":
     app.run(debug=True)

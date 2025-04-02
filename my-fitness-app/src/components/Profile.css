@@ -204,6 +204,99 @@ body {
     50% { opacity: 0.5; }
 }
 
+/* New styles for edit functionality */
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.details-header h2 {
+    color: #e6c97d;
+    margin: 0;
+}
+
+.edit-button, .save-button, .cancel-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.edit-button {
+    background-color: #e6c97d;
+    color: #4a2626;
+}
+
+.edit-button:hover {
+    background-color: #b08a38;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.save-button {
+    background-color: #5fb85f;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #4a9e4a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cancel-button {
+    background-color: #d9534f;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #c9302c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-input {
+    padding: 8px 12px;
+    border: 1px solid #e6c97d;
+    border-radius: 4px;
+    background-color: #5a3636;
+    color: #e6c97d;
+    width: 60%;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #b08a38;
+    box-shadow: 0 0 0 2px rgba(176, 138, 56, 0.25);
+}
+
+.update-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: rgba(95, 184, 95, 0.2);
+    color: #5fb85f;
+    border-radius: 4px;
+    text-align: center;
+    border-left: 4px solid #5fb85f;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
@@ -217,5 +310,22 @@ body {
     .exercise-performance-container {
         flex: none;
         width: 100%;
+    }
+    
+    .profile-field {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .field-label {
+        margin-bottom: 5px;
+    }
+    
+    .edit-input {
+        width: 100%;
+    }
+    
+    .edit-actions {
+        margin-top: 10px;
     }
 }
