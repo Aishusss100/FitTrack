@@ -459,7 +459,7 @@ const Exercise = () => {
                                 const value = e.target.value;
                                 setTargetReps(value === '' ? '' : parseInt(value) || '');
                             }}
-                            placeholder="Enter reps (optional)"
+                            placeholder="Enter reps(<50)"
                         />
                         <button onClick={handleSetTarget}>Set Target</button>
                     </div>

@@ -9,7 +9,7 @@ import tempfile
 import threading
 import math
 import pyttsx3
-
+import time
 
 # Initialize MediaPipe
 mp_drawing = mp.solutions.drawing_utils
@@ -47,10 +47,15 @@ cap = None
 
 username = "default_user" 
 
+# Variables for autosaving progress
+last_saved_reps = 0
+autosave_thread = None
+should_stop_thread = False
 
 def init_exercise_tracker():
     """Initialize or reset the exercise tracker state"""
     global exercises, current_exercise, exercise_started, target_reps, target_achieved
+    global last_saved_reps, autosave_thread, should_stop_thread
     
     for exercise in exercises.values():
         exercise['counter'] = 0
@@ -59,6 +64,9 @@ def init_exercise_tracker():
     exercise_started = False
     target_reps = 0
     target_achieved = False
+    last_saved_reps = 0
+    should_stop_thread = False
+    autosave_thread = None
 
 def get_exercise_data():
     """Return the current exercise data"""
@@ -88,7 +96,6 @@ def set_target_reps(reps):
     target_achieved = False
     return {'target_reps': target_reps}
 
-import requests
 # Fetch username dynamically from the backend
 def fetch_username():
     url = "http://localhost:5000/api/get_username"
@@ -103,39 +110,81 @@ def fetch_username():
         print(f"Error fetching username: {e}")
         return None
     
-
 # Define the backend API endpoint for updating progress
 API_URL = "http://localhost:5000/api/update_progress"
 
-def update_progress_api(exercise_name, reps):
+def update_progress_api(exercise_name, reps, duration=0):
     # Fetch the username dynamically
     username = fetch_username()
     if not username:
         print("No user is logged in. Cannot update progress.")
-        return
+        return False
 
     payload = {
-        "username": username,
         "exercise_name": exercise_name,
-        "reps": reps
+        "reps": reps,
+        "duration": duration
     }
     try:
         response = requests.post(API_URL, json=payload)
         if response.status_code == 200:
-            print(f"Progress updated: {exercise_name} - {reps} reps")
+            print(f"Progress updated: {exercise_name} - {reps} reps, {duration} seconds")
+            return True
         else:
             print(f"Failed to update progress: {response.text}")
+            return False
     except Exception as e:
         print(f"Error updating progress: {e}")
+        return False
 
+def autosave_progress():
+    """Autosave progress every 10 seconds in a reliable manner."""
+    global should_stop_thread, last_saved_reps, current_exercise, exercises
+
+    while not should_stop_thread:
+        time.sleep(10)  # Wait for 10 seconds
+
+        if exercise_started and current_exercise in exercises:
+            current_reps = exercises[current_exercise]['counter']
+
+            # Only update if there are new reps
+            if current_reps > last_saved_reps:
+                reps_to_save = current_reps - last_saved_reps
+                success = update_progress_api(current_exercise, reps_to_save, duration=10)
+
+                if success:
+                    print(f"Autosaved {reps_to_save} reps for {current_exercise}")
+                    last_saved_reps = current_reps
+
+def start_autosave_thread():
+    """Start autosaving in a background thread."""
+    global autosave_thread, should_stop_thread
+
+    should_stop_thread = False  # Reset the stopping flag
+
+    if autosave_thread is None or not autosave_thread.is_alive():
+        autosave_thread = threading.Thread(target=autosave_progress)
+        autosave_thread.daemon = True
+        autosave_thread.start()
+
+def stop_autosave_thread():
+    """Stop the autosave background thread gracefully."""
+    global should_stop_thread, autosave_thread
+
+    should_stop_thread = True  # Tell the thread to stop
+
+    if autosave_thread and autosave_thread.is_alive():
+        autosave_thread.join(2)  # Wait for 2 seconds to allow cleanup
 
 def start_exercise(exercise_name):
     """Start the exercise tracking and set the current exercise."""
-    global exercise_started, target_achieved, current_exercise, exercises, cap  # Include cap here
+    global exercise_started, target_achieved, current_exercise, exercises, cap
+    global autosave_thread, should_stop_thread, last_saved_reps
 
     exercise_started = True
     target_achieved = False
     current_exercise = exercise_name  # Set the current exercise
+    last_saved_reps = 0
     print(f"Current exercise set to: {current_exercise}")
 
     # Reset counters for all exercises
@@ -148,20 +197,38 @@ def start_exercise(exercise_name):
         cap = cv2.VideoCapture(0)  # Initialize cap
     elif not cap.isOpened():
         cap.open(0)  # Open cap if it is closed
+    
+    # Start autosave thread
+    should_stop_thread = False
+    if autosave_thread is None or not autosave_thread.is_alive():
+        autosave_thread = threading.Thread(target=autosave_progress)
+        autosave_thread.daemon = True
+        autosave_thread.start()
 
     return {'success': True, 'message': f'{current_exercise} started'}
 
 def stop_exercise():
     """Stop the exercise tracking"""
     global exercise_started, cap, target_achieved, current_exercise, exercises
+    global autosave_thread, should_stop_thread, last_saved_reps
     
     exercise_started = False
     target_achieved = False
     
+    # Signal thread to stop
+    should_stop_thread = True
+    if autosave_thread and autosave_thread.is_alive():
+        autosave_thread.join(2)  # Wait for up to 2 seconds for thread to finish
+    
+    # Calculate final reps that haven't been saved yet
+    final_reps = 0
+    if current_exercise and current_exercise in exercises:
+        final_reps = exercises[current_exercise]['counter'] - last_saved_reps
+    
     # Get the current exercise data before stopping
     exercise_data = {
         'exercise_name': current_exercise,
-        'reps': exercises[current_exercise]['counter']
+        'reps': final_reps  # Only count unsaved reps
     }
     
     # Release video capture
@@ -198,11 +265,6 @@ def announce_feedback(message):
         else:
             print(f"[Queued Feedback]: {message}")
 
-
-# def announce_target_achieved():
-#     print("Target Achieved Announcement Triggered")
-#     announce_feedback("Target achieved!")
-
 def _announce(message):
     """Thread function for TTS handling."""
     global is_speaking
@@ -235,9 +297,6 @@ def _announce(message):
     finally:
         with tts_lock:
             is_speaking = False
-
-
-import time
 
 
 
@@ -626,18 +685,21 @@ def generate_video_frames():
     if cap is not None and cap.isOpened():
         cap.release()
     
-# New exercise processing functions can be defined below
-def process_bicep_curl(landmarks, side):
-    """Logic for bicep curls (left/right)"""
-    # Check posture
-    posture_feedback = check_posture(landmarks)
-    print(posture_feedback) 
 
+def process_bicep_curl(landmarks, side):
+    """Logic for bicep curls (left/right) with elbow position check"""
+    
+    posture_feedback = check_posture(landmarks)
+    print(posture_feedback)
+    
     global exercises, target_reps, target_achieved, username
     exercise_key = f'bicep_curl_{side.lower()}'
+    
     if current_exercise != exercise_key:
         return
-    shoulder, elbow, wrist = None, None, None
+    
+    shoulder, elbow, wrist, hip = None, None, None, None
+    
     if side == 'LEFT':
         shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
@@ -645,6 +707,9 @@ def process_bicep_curl(landmarks, side):
                  landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
         wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+        hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+               landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+               
     elif side == 'RIGHT':
         shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
                     landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
@@ -652,23 +717,43 @@ def process_bicep_curl(landmarks, side):
                  landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
         wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
                  landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-
+        hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+               landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
+    
     angle = calculate_angle(shoulder, elbow, wrist)
-
-    # Curl logic
+    
+    
+    horizontal_distance = abs(elbow[0] - hip[0])
+    elbow_threshold = 0.12
+    good_form = horizontal_distance <= elbow_threshold
+    
+   
+    if not hasattr(process_bicep_curl, 'last_elbow_feedback_time'):
+        process_bicep_curl.last_elbow_feedback_time = 0
+    
+    # Check if elbow is too far from body with cooldown
+    current_time = time.time()
+    if not good_form and current_time - process_bicep_curl.last_elbow_feedback_time > 1.0:
+        feedback_message = f"Keep your {side.lower()} elbow closer to your body"
+        announce_feedback(feedback_message)  # Use existing announce_feedback
+        process_bicep_curl.last_elbow_feedback_time = current_time
+        print(f"Form check: {feedback_message}, distance: {horizontal_distance:.3f}")
+    
+    
     if angle > 160:
         exercises[f'bicep_curl_{side.lower()}']['stage'] = "down"
     if angle < 30 and exercises[f'bicep_curl_{side.lower()}']['stage'] == "down":
-        exercises[f'bicep_curl_{side.lower()}']['stage'] = "up"
-        exercises[f'bicep_curl_{side.lower()}']['counter'] += 1
-
-        # Send progress update to the backend
-        #update_progress_api(exercise_key, 1)
-
-        if exercises[f'bicep_curl_{side.lower()}']['counter'] >= target_reps > 0:
-            if not target_achieved:  # Only trigger when target_achieved is False
-                target_achieved = True
-                # announce_target_achieved()
+        if good_form:  # Only increment counter if form is good (elbow close to body)
+            exercises[f'bicep_curl_{side.lower()}']['stage'] = "up"
+            exercises[f'bicep_curl_{side.lower()}']['counter'] += 1
+            
+            # Send progress update to the backend
+            # update_progress_api(exercise_key, 1)
+            
+            if exercises[f'bicep_curl_{side.lower()}']['counter'] >= target_reps > 0:
+                if not target_achieved:  # Only trigger when target_achieved is False
+                    target_achieved = True
+                    # announce_target_achieved()
 
 def process_overhead_press(landmarks, side):
     # Check posture

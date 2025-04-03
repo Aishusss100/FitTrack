@@ -101,88 +101,116 @@ const ProgressPage = () => {
         beginAtZero: true,
       },
     },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        }
+      },
+      tooltip: {
+        titleFont: {
+          size: 16
+        },
+        bodyFont: {
+          size: 14
+        },
+        padding: 10
+      }
+    }
   };
 
   return (
     <div className="progress-page">
-      {/* Exercise Selector */}
-      <div className="exercise-selector">
-        <label htmlFor="exercise">Select Exercise:</label>
-        <select
-          id="exercise"
-          value={selectedExercise}
-          onChange={(e) => setSelectedExercise(e.target.value)}
-        >
-          {exerciseList.map((exercise, index) => (
-            <option key={index} value={exercise}>
-              {exercise.replace(/_/g, " ")}
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="two-column-layout">
+        {/* Left Column - Controls */}
+        <div className="left-column">
+          {/* Exercise Selector */}
+          <div className="exercise-selector">
+            <label htmlFor="exercise">Select Exercise:</label>
+            <select
+              id="exercise"
+              value={selectedExercise}
+              onChange={(e) => setSelectedExercise(e.target.value)}
+            >
+              {exerciseList.map((exercise, index) => (
+                <option key={index} value={exercise}>
+                  {exercise.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {/* View Selector */}
-      <div className="view-selector">
-        <button
-          className={viewType === "daily" ? "active" : ""}
-          onClick={() => setViewType("daily")}
-        >
-          Daily
-        </button>
-        <button
-          className={viewType === "weekly" ? "active" : ""}
-          onClick={() => setViewType("weekly")}
-        >
-          Weekly
-        </button>
-        <button
-          className={viewType === "monthly" ? "active" : ""}
-          onClick={() => setViewType("monthly")}
-        >
-          Monthly
-        </button>
-      </div>
+          {/* View Selector */}
+          <div className="view-selector">
+            <button
+              className={viewType === "daily" ? "active" : ""}
+              onClick={() => setViewType("daily")}
+            >
+              Daily
+            </button>
+            <button
+              className={viewType === "weekly" ? "active" : ""}
+              onClick={() => setViewType("weekly")}
+            >
+              Weekly
+            </button>
+            <button
+              className={viewType === "monthly" ? "active" : ""}
+              onClick={() => setViewType("monthly")}
+            >
+              Monthly
+            </button>
+          </div>
+        </div>
 
-      {/* Loading Indicator */}
-      {isLoading && <div className="loading-message">Loading...</div>}
+        {/* Right Column - Content Display */}
+        <div className="right-column">
+          {/* Loading Indicator */}
+          {isLoading && <div className="loading-message">Loading...</div>}
 
-      {/* Error Messages */}
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+          {/* Error Messages */}
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {!isLoading && progressData.length > 0 && viewType === "daily" && (
-        <div className="daily-details">
-          {progressData.map((entry, index) => (
-            <div key={index} className="progress-item">
-              <p>
-                <strong>Date:</strong> {entry.date}
-              </p>
-              <p>
-                <strong>Reps:</strong> {entry.reps}
-              </p>
-              <p>
-                <strong>Duration:</strong> {(entry.duration / 60).toFixed(2)} mins
-              </p>
-              <p>
-                <strong>Efficiency:</strong> {(entry.reps / entry.duration).toFixed(2)}
-              </p>
+          {!isLoading && progressData.length > 0 && viewType === "daily" && (
+            <div className="daily-details">
+              {progressData.map((entry, index) => (
+                <div key={index} className="progress-item">
+                  <p>
+                    <strong>Date:</strong> {entry.date}
+                  </p>
+                  <p>
+                    <strong>Reps:</strong> {entry.reps}
+                  </p>
+                  <p>
+                    <strong>Duration:</strong> {(entry.duration / 60).toFixed(2)} mins
+                  </p>
+                  <p>
+                    <strong>Efficiency:</strong> {(entry.reps / entry.duration).toFixed(2)}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {!isLoading && progressData.length > 0 && viewType !== "daily" && (
-        <div style={{ width: "100%", height: "400px" }}>
-          <Line
-            key={selectedExercise + viewType} // Forces rerender on state changes
-            data={chartData}
-            options={chartOptions}
-          />
-        </div>
-      )}
+          {!isLoading && progressData.length > 0 && viewType !== "daily" && (
+            <div className="chart-container">
+              <Line
+                key={selectedExercise + viewType} // Forces rerender on state changes
+                data={chartData}
+                options={chartOptions}
+              />
+            </div>
+          )}
 
-      {!isLoading && progressData.length === 0 && !errorMessage && (
-        <div className="no-data-message">No progress data available for this selection.</div>
-      )}
+          {!isLoading && progressData.length === 0 && !errorMessage && (
+            <div className="no-data-message">No progress data available for this selection.</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

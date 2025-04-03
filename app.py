@@ -106,6 +106,7 @@ def api_login():
         session['username'] = username
         session.modified = True
         init_exercise_tracker()
+        delete_expired_goals()
         return jsonify({'message': 'Login successful', 'username': username})
     else:
         return jsonify({'message': 'Invalid username or password'}), 401
@@ -270,7 +271,7 @@ def update_progress_internal(data):
 def home():
     return "Welcome to the Flask Backend!"
 
-# Add this endpoint to your app.py file
+
 
 @app.route('/api/get_total_calories', methods=['GET'])
 def get_total_calories():
@@ -478,6 +479,49 @@ def get_streak():
     return jsonify({'streak': streak})
 
 
+
+def delete_expired_goals():
+    """
+    Delete goals that have passed their end date and haven't been achieved.
+    This function removes goals where:
+    1. The goal is not achieved (is_achieved = 0)
+    2. Current date is greater than (created_at + days_to_complete)
+    """
+    if 'username' not in session:
+        return {'success': False, 'message': 'User not logged in'}
+
+    username = session['username']
+    today = str(date.today())
+    
+    conn = sqlite3.connect('exercise_progress_with_duration.db')
+    c = conn.cursor()
+    
+    try:
+        # Find and delete expired goals
+        c.execute('''
+            DELETE FROM user_goals 
+            WHERE username = ? 
+            AND is_achieved = 0 
+            AND date(created_at, '+' || days_to_complete || ' days') < date(?)
+        ''', (username, today))
+        
+        deleted_count = c.rowcount
+        conn.commit()
+        
+        return {
+            'success': True, 
+            'message': f'Deleted {deleted_count} expired goals',
+            'deleted_count': deleted_count
+        }
+        
+    except Exception as e:
+        print(f"Error deleting expired goals: {e}")
+        return {'success': False, 'message': 'Failed to delete expired goals'}
+    finally:
+        conn.close()
+
+
+
 @app.route('/api/create_goal', methods=['POST'])
 def create_goal():
     # Check if user is logged in
@@ -550,6 +594,9 @@ def get_goals():
     if 'username' not in session:
         return jsonify({'message': 'User not logged in'}), 401
 
+    # First, clean up expired goals
+    delete_expired_goals()
+    
     is_achieved = request.args.get('is_achieved', None)  # Filter by active/achieved goals
     username = session['username']
 
@@ -587,6 +634,15 @@ def get_goals():
         return jsonify({'message': 'Failed to fetch goals'}), 500
     finally:
         conn.close()
+
+
+@app.route('/api/cleanup_expired_goals', methods=['POST'])
+def cleanup_expired_goals():
+    if 'username' not in session:
+        return jsonify({'message': 'User not logged in'}), 401
+    
+    result = delete_expired_goals()
+    return jsonify(result)
 
 # Delete a goal
 @app.route('/api/delete_goal', methods=['DELETE'])
@@ -634,6 +690,9 @@ def check_goal_progress():
     if 'username' not in session:
         return jsonify({'message': 'User not logged in'}), 401
 
+    # Clean up expired goals first
+    delete_expired_goals()
+    
     goal_id = request.args.get('goal_id')
     
     conn = sqlite3.connect('exercise_progress_with_duration.db')
@@ -708,6 +767,7 @@ def check_goal_progress():
     finally:
         conn.close()
 
+
 @app.route('/api/get_achieved_goals', methods=['GET'])
 def get_achieved_goals():
     if 'username' not in session:
@@ -750,12 +810,14 @@ def get_pending_goals_count():
     if 'username' not in session:
         return jsonify({'message': 'User not logged in'}), 401
 
+    # Clean up expired goals first
+    delete_expired_goals()
+    
     username = session['username']
     conn = sqlite3.connect('exercise_progress_with_duration.db')
     c = conn.cursor()
     
     try:
-        # Count pending goals that are not achieved and not expired
         c.execute('''
             SELECT COUNT(*) 
             FROM user_goals 
@@ -776,8 +838,6 @@ def get_pending_goals_count():
     finally:
         conn.close()
 
-
-
 @app.route('/api/update_profile', methods=['POST'])
 def update_profile():
     if 'username' not in session:
@@ -795,7 +855,7 @@ def update_profile():
     c = conn.cursor()
     
     try:
-        # Update the user profile
+        
         c.execute('''
             UPDATE users 
             SET name = ?, date_of_birth = ?, email = ? 
