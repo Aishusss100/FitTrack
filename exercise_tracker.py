@@ -10,14 +10,16 @@ import threading
 import math
 import pyttsx3
 import time
-
+import uuid
 # Initialize MediaPipe
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 tts_lock = threading.Lock()
 is_speaking = False
-temp_dir = tempfile.gettempdir() 
+# temp_dir = tempfile.gettempdir() 
+audio_temp_dir = os.path.join(tempfile.gettempdir(), 'exercise_audio')
+os.makedirs(audio_temp_dir, exist_ok=True)
 
 tts_engine = pyttsx3.init()
 
@@ -252,56 +254,139 @@ def calculate_angle(a, b, c):
         
     return angle
 
-def announce_feedback(message):
-    """
-    Announce feedback asynchronously using gTTS and playsound.
-    """
-    global is_speaking
+# def announce_feedback(message):
+#     """
+#     Announce feedback asynchronously using gTTS and playsound.
+#     """
+#     global is_speaking
+    
+#     with tts_lock:
+#         if not is_speaking:
+#             is_speaking = True
+#             threading.Thread(target=_announce, args=(message,), daemon=True).start()
+#         else:
+#             print(f"[Queued Feedback]: {message}")
+
+# def _announce(message):
+#     """Thread function for TTS handling."""
+#     global is_speaking
+    
+#     try:
+#         # Create a temporary file for TTS audio
+#         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
+        
+#         # Generate the TTS audio file
+#         tts = gTTS(text=message, lang='en', slow=False)
+#         tts.save(temp_file)
+        
+#         # Play the audio file
+#         if os.path.exists(temp_file):
+#             playsound(temp_file)
+#         else:
+#             print(f"Error: File {temp_file} does not exist.")
+        
+#         # Clean up temporary file
+#         try:
+#             os.remove(temp_file)
+#             print(f"Temporary file {temp_file} deleted successfully.")
+#         except FileNotFoundError:
+#             print(f"File {temp_file} not found for cleanup.")
+#         except Exception as e:
+#             print(f"Error deleting temporary file: {e}")
+    
+#     except Exception as e:
+#         print(f"TTS Error: {e}")
+#     finally:
+#         with tts_lock:
+#             is_speaking = False
+
+import pygame
+
+# Initialize pygame mixer early in your program
+pygame.mixer.init()
+
+# Global variables for feedback
+tts_lock = threading.Lock()
+is_speaking = False
+temp_files_to_delete = []
+
+# Add a cleanup thread to handle file deletion
+def cleanup_worker():
+    global temp_files_to_delete
+    while True:
+        if temp_files_to_delete:
+            files_to_try = temp_files_to_delete.copy()
+            temp_files_to_delete = []
+            
+            for file_path in files_to_try:
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"Successfully deleted: {file_path}")
+                except Exception as e:
+                    print(f"Could not delete {file_path} yet: {e}")
+                    temp_files_to_delete.append(file_path)
+        time.sleep(1.0)
+
+# Start the cleanup thread
+cleanup_thread = threading.Thread(target=cleanup_worker)
+cleanup_thread.daemon = True
+cleanup_thread.start()
+
+def speak_feedback(text):
+    """Thread-safe function to speak feedback using gTTS and pygame"""
+    global is_speaking, tts_lock, temp_files_to_delete
     
     with tts_lock:
-        if not is_speaking:
-            is_speaking = True
-            threading.Thread(target=_announce, args=(message,), daemon=True).start()
-        else:
-            print(f"[Queued Feedback]: {message}")
-
-def _announce(message):
-    """Thread function for TTS handling."""
-    global is_speaking
+        if is_speaking:
+            return False  # Skip if already speaking
+        is_speaking = True
     
-    try:
-        # Create a temporary file for TTS audio
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-        
-        # Generate the TTS audio file
-        tts = gTTS(text=message, lang='en', slow=False)
-        tts.save(temp_file)
-        
-        # Play the audio file
-        if os.path.exists(temp_file):
-            playsound(temp_file)
-        else:
-            print(f"Error: File {temp_file} does not exist.")
-        
-        # Clean up temporary file
+    def speak_worker():
+        global is_speaking, tts_lock, temp_files_to_delete
         try:
-            os.remove(temp_file)
-            print(f"Temporary file {temp_file} deleted successfully.")
-        except FileNotFoundError:
-            print(f"File {temp_file} not found for cleanup.")
-        except Exception as e:
-            print(f"Error deleting temporary file: {e}")
-    
-    except Exception as e:
-        print(f"TTS Error: {e}")
-    finally:
-        with tts_lock:
-            is_speaking = False
+            unique_id = str(uuid.uuid4()).replace('-', '')[:8]
+            simple_dir = "C:/temp_audio"
+            os.makedirs(simple_dir, exist_ok=True)
+            temp_file = f"{simple_dir}/tts_{unique_id}.mp3"
+            
+            # Generate TTS file
+            tts = gTTS(text=text, lang='en', slow=False)
+            tts.save(temp_file)
+            
+            # Play the file with pygame
+            pygame.mixer.music.load(temp_file)
+            pygame.mixer.music.play()
+            
+            # Wait for playback to finish
+            while pygame.mixer.music.get_busy():
+                pygame.time.Clock().tick(10)
 
+            # Stop and unload to release file lock
+            pygame.mixer.music.stop()
+            pygame.mixer.music.unload()
+            
+            # Add to cleanup queue
+            time.sleep(0.1)  # Optional: ensure system is ready
+            temp_files_to_delete.append(temp_file)
+
+        except Exception as e:
+            print(f"TTS Error: {e}")
+        finally:
+            with tts_lock:
+                is_speaking = False
+    
+    thread = threading.Thread(target=speak_worker)
+    thread.daemon = True
+    thread.start()
+    return True
+
+def announce_feedback(feedback):
+    """Provide posture feedback."""
+    speak_feedback(f"{feedback}")
 
 
 def check_posture(landmarks):
-    
     # Extract relevant landmarks for posture assessment
     left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
     right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
@@ -369,9 +454,6 @@ def check_posture(landmarks):
     elif shoulder_midpoint_x < hip_midpoint_x - 0.02:
         leaning_direction = "left"
 
-    # Debugging outputs
-    # print(f"Sideways Vector: {sideways_vector}, Sideways Angle: {sideways_angle:.2f}°, Direction: {leaning_direction}")
-
     # Check if sideways angle exceeds threshold
     sideways_lean = sideways_angle > SIDEWAYS_ANGLE_THRESHOLD
 
@@ -379,9 +461,6 @@ def check_posture(landmarks):
     shoulder_to_hip_distance = ((shoulder_midpoint_x - hip_midpoint_x)**2 + 
                                 (shoulder_midpoint_y - hip_midpoint_y)**2)**0.5
     forward_slouch = shoulder_to_hip_distance < FORWARD_SLOUCH_THRESHOLD
-
-    # Debugging output for forward slouch detection
-    # print(f"Shoulder-to-Hip Distance: {shoulder_to_hip_distance:.3f}, Threshold: {FORWARD_SLOUCH_THRESHOLD}")
 
     # Calculate the standard checks as before
     shoulder_diff = abs(left_shoulder.y - right_shoulder.y)
@@ -399,7 +478,7 @@ def check_posture(landmarks):
     elif backward_bending:
         posture_issue = "straighten up - you're leaning backward"
     elif sideways_lean:
-        posture_issue = f"straighten your body - detected sideways leaning "
+        posture_issue = f"straighten your body - detected sideways leaning"
     elif forward_slouch:
         posture_issue = "pull your head back - you're slouching forward (shoulders too close to hips)"
     elif uneven_shoulders:
@@ -409,23 +488,60 @@ def check_posture(landmarks):
     elif torso_alignment_issue:
         posture_issue = "elongate your spine - you're compressing your torso"
 
-    # Initialize last issue tracking if not already done
+    # Initialize static variables if not already done
     if not hasattr(check_posture, 'last_issue'):
         check_posture.last_issue = None
     if not hasattr(check_posture, 'last_notification_time'):
         check_posture.last_notification_time = 0
+    if not hasattr(check_posture, 'issue_confidence'):
+        check_posture.issue_confidence = {}
+    if not hasattr(check_posture, 'good_posture_notification_time'):
+        check_posture.good_posture_notification_time = 0
     
     current_time = time.time()
-    min_notification_interval = 1.0  # Minimum seconds between notifications
-
-    # Debug data for detection - useful for troubleshooting
-    debug_info = f"Direction: {leaning_direction}, Forward: {forward_bending}, Backward: {backward_bending}, Sideways Angle: {sideways_angle:.1f}°"
-    # print(debug_info)
     
-    # Check if we should announce now (new issue or enough time passed)
-    if (posture_issue != check_posture.last_issue or 
-            (posture_issue and current_time - check_posture.last_notification_time > min_notification_interval)):
+    # Improve confidence system - track how consistently an issue is detected
+    confidence_decay = 0.7  # How quickly confidence decreases when issue not detected
+    confidence_increase = 0.3  # How quickly confidence increases when issue detected
+    confidence_threshold = 0.8  # Threshold to trigger notification
+    
+    # Reset or decrease confidence for all issues not currently detected
+    for issue in list(check_posture.issue_confidence.keys()):
+        if issue != posture_issue:
+            check_posture.issue_confidence[issue] = check_posture.issue_confidence[issue] * confidence_decay
+            if check_posture.issue_confidence[issue] < 0.1:
+                del check_posture.issue_confidence[issue]  # Remove low confidence issues
+    
+    # Increase confidence for the current issue
+    if posture_issue:
+        if posture_issue not in check_posture.issue_confidence:
+            check_posture.issue_confidence[posture_issue] = 0
+        check_posture.issue_confidence[posture_issue] += confidence_increase
+        check_posture.issue_confidence[posture_issue] = min(1.0, check_posture.issue_confidence[posture_issue])
+    
+    # Determine if notification should be sent
+    should_notify = False
+    notification_interval = 5.0  # Minimum seconds between notifications
+    
+    if posture_issue and posture_issue in check_posture.issue_confidence:
+        confidence = check_posture.issue_confidence[posture_issue]
         
+        # Notify if confidence is high enough and enough time has passed since last notification
+        if (confidence >= confidence_threshold and 
+                (posture_issue != check_posture.last_issue or 
+                 current_time - check_posture.last_notification_time > notification_interval)):
+            should_notify = True
+    
+    # Good posture notification (less frequent)
+    good_posture_interval = 30.0  # Only notify about good posture every 30 seconds
+    if not posture_issue and current_time - check_posture.good_posture_notification_time > good_posture_interval:
+        # Clear all issue confidence when good posture is sustained
+        check_posture.issue_confidence.clear()
+        should_notify = True
+        check_posture.good_posture_notification_time = current_time
+    
+    # Provide feedback if needed
+    if should_notify:
         check_posture.last_issue = posture_issue
         check_posture.last_notification_time = current_time
         
@@ -442,7 +558,6 @@ def check_posture(landmarks):
         return f"Posture Feedback: Needs correction ({posture_issue})"
     else:
         return "Posture Feedback: Good posture!"
-
 
 
 def generate_video_frames():
@@ -724,7 +839,7 @@ def process_bicep_curl(landmarks, side):
     
     
     horizontal_distance = abs(elbow[0] - hip[0])
-    elbow_threshold = 0.12
+    elbow_threshold = 0.15
     good_form = horizontal_distance <= elbow_threshold
     
    

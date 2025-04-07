@@ -60,7 +60,7 @@ const Login = () => {
 
     return (
         <div className="login-container">
-            <h1>Login</h1>
+            <h1>FitTrack</h1>
             {message && <div className={message.includes('failed') ? "error-message" : "success-message"}>{message}</div>}
             <form onSubmit={handleLogin}>
                 <div className="form-group">
