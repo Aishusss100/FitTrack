@@ -254,51 +254,6 @@ def calculate_angle(a, b, c):
         
     return angle
 
-# def announce_feedback(message):
-#     """
-#     Announce feedback asynchronously using gTTS and playsound.
-#     """
-#     global is_speaking
-    
-#     with tts_lock:
-#         if not is_speaking:
-#             is_speaking = True
-#             threading.Thread(target=_announce, args=(message,), daemon=True).start()
-#         else:
-#             print(f"[Queued Feedback]: {message}")
-
-# def _announce(message):
-#     """Thread function for TTS handling."""
-#     global is_speaking
-    
-#     try:
-#         # Create a temporary file for TTS audio
-#         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
-        
-#         # Generate the TTS audio file
-#         tts = gTTS(text=message, lang='en', slow=False)
-#         tts.save(temp_file)
-        
-#         # Play the audio file
-#         if os.path.exists(temp_file):
-#             playsound(temp_file)
-#         else:
-#             print(f"Error: File {temp_file} does not exist.")
-        
-#         # Clean up temporary file
-#         try:
-#             os.remove(temp_file)
-#             print(f"Temporary file {temp_file} deleted successfully.")
-#         except FileNotFoundError:
-#             print(f"File {temp_file} not found for cleanup.")
-#         except Exception as e:
-#             print(f"Error deleting temporary file: {e}")
-    
-#     except Exception as e:
-#         print(f"TTS Error: {e}")
-#     finally:
-#         with tts_lock:
-#             is_speaking = False
 
 import pygame
 
@@ -385,7 +340,6 @@ def announce_feedback(feedback):
     """Provide posture feedback."""
     speak_feedback(f"{feedback}")
 
-
 def check_posture(landmarks):
     # Extract relevant landmarks for posture assessment
     left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
@@ -405,7 +359,7 @@ def check_posture(landmarks):
     hip_midpoint_y = (left_hip.y + right_hip.y) / 2
     
     # Define appropriate thresholds
-    SHOULDER_THRESHOLD = 0.035
+    SHOULDER_THRESHOLD = 0.060
     HIP_THRESHOLD = 0.025
     SIDEWAYS_ANGLE_THRESHOLD = 7  # Threshold in degrees for sideways leaning
     FORWARD_SLOUCH_THRESHOLD = 0.15  # Distance threshold for forward slouching
@@ -472,6 +426,9 @@ def check_posture(landmarks):
     # Initialize posture issue message
     posture_issue = None
 
+    # Check if current exercise is an overhead press exercise
+    is_overhead_press = 'current_exercise' in globals() and current_exercise and ('overhead_press' in current_exercise)
+
     # Prioritize bending issues
     if forward_bending:
         posture_issue = "straighten up - you're bending forward"
@@ -481,7 +438,8 @@ def check_posture(landmarks):
         posture_issue = f"straighten your body - detected sideways leaning"
     elif forward_slouch:
         posture_issue = "pull your head back - you're slouching forward (shoulders too close to hips)"
-    elif uneven_shoulders:
+    # Skip uneven shoulders check for overhead press exercises
+    elif uneven_shoulders and not is_overhead_press:
         posture_issue = "level your shoulders"
     elif uneven_hips:
         posture_issue = "align your hips"
@@ -497,6 +455,8 @@ def check_posture(landmarks):
         check_posture.issue_confidence = {}
     if not hasattr(check_posture, 'good_posture_notification_time'):
         check_posture.good_posture_notification_time = 0
+    if not hasattr(check_posture, 'issue_last_notified'):
+        check_posture.issue_last_notified = {}
     
     current_time = time.time()
     
@@ -521,16 +481,28 @@ def check_posture(landmarks):
     
     # Determine if notification should be sent
     should_notify = False
-    notification_interval = 5.0  # Minimum seconds between notifications
+    
+    # Define issue-specific notification intervals (longer for repetitive issues)
+    notification_intervals = {
+        "level your shoulders": 20.0,  # Longer interval for shoulder level feedback
+        "default": 10.0              # Default interval for other issues
+    }
     
     if posture_issue and posture_issue in check_posture.issue_confidence:
         confidence = check_posture.issue_confidence[posture_issue]
         
-        # Notify if confidence is high enough and enough time has passed since last notification
-        if (confidence >= confidence_threshold and 
-                (posture_issue != check_posture.last_issue or 
-                 current_time - check_posture.last_notification_time > notification_interval)):
+        # Get the appropriate notification interval for this issue
+        notification_interval = notification_intervals.get(posture_issue, notification_intervals["default"])
+        
+        # Check when this specific issue was last notified
+        last_notified = check_posture.issue_last_notified.get(posture_issue, 0)
+        time_since_last_notification = current_time - last_notified
+        
+        # Notify if confidence is high enough and enough time has passed since last notification of this issue
+        if confidence >= confidence_threshold and time_since_last_notification > notification_interval:
             should_notify = True
+            # Update the last notification time for this specific issue
+            check_posture.issue_last_notified[posture_issue] = current_time
     
     # Good posture notification (less frequent)
     good_posture_interval = 30.0  # Only notify about good posture every 30 seconds
@@ -558,7 +530,6 @@ def check_posture(landmarks):
         return f"Posture Feedback: Needs correction ({posture_issue})"
     else:
         return "Posture Feedback: Good posture!"
-
 
 def generate_video_frames():
     """Generate video frames with pose detection and exercise tracking"""
@@ -919,7 +890,7 @@ def process_overhead_press(landmarks, side):
 
 def process_lateral_raise(landmarks, side):
     """
-    Simplified lateral raise counter based on wrist horizontal movement
+    Enhanced lateral raise counter based on wrist horizontal movement and shoulder angle
     
     Args:
     landmarks: Mediapipe pose landmarks
@@ -927,8 +898,8 @@ def process_lateral_raise(landmarks, side):
     """
     # Check posture
     posture_feedback = check_posture(landmarks)
-    print(posture_feedback) 
-
+    print(posture_feedback)
+    
     global exercises, target_reps, target_achieved, username, current_exercise
     
     # Define the exercise key based on side
@@ -937,25 +908,37 @@ def process_lateral_raise(landmarks, side):
     # Prevent processing if not the current exercise
     if current_exercise != exercise_key:
         return
-
+    
     # Select appropriate landmarks based on side
     if side == 'LEFT':
         shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+        elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value]
         wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value]
         hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
     else:  # RIGHT
         shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+        elbow = landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
         wrist = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value]
         hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
     
-    # Calculate horizontal displacement of wrist from shoulder
-    horizontal_displacement = abs(wrist.x - shoulder.x)
+    # Calculate angle at shoulder between hip-shoulder-wrist
+    shoulder_angle = calculate_angle(
+        [hip.x, hip.y],
+        [shoulder.x, shoulder.y],
+        [wrist.x, wrist.y]
+    )
     
-    # Threshold for horizontal movement (adjust as needed)
+    # Define angle thresholds for lateral raise
+    UP_ANGLE_THRESHOLD = 85  # Between 85 and 90 degrees is considered "up"
+    DOWN_ANGLE_THRESHOLD = 30  # Less than 30 degrees is considered "down"
+    
+    # Track horizontal displacement as additional verification
+    horizontal_displacement = abs(wrist.x - shoulder.x)
     HORIZONTAL_MOVEMENT_THRESHOLD = 0.2
     
-    # Check if the current stage is down and horizontal movement is significant
-    if (horizontal_displacement > HORIZONTAL_MOVEMENT_THRESHOLD and
+    # Check if arm is raised (up position)
+    if (shoulder_angle >= UP_ANGLE_THRESHOLD and 
+        horizontal_displacement > HORIZONTAL_MOVEMENT_THRESHOLD and
         exercises[exercise_key]['stage'] == 'down'):
         
         # Mark as up stage and increment counter
@@ -968,10 +951,11 @@ def process_lateral_raise(landmarks, side):
                 target_achieved = True
                 # announce_target_achieved()
     
-    # Reset to down stage when horizontal displacement is small
-    elif horizontal_displacement < 0.1:
+    # Reset to down stage when angle is small
+    elif shoulder_angle < DOWN_ANGLE_THRESHOLD:
         exercises[exercise_key]['stage'] = 'down'
 
+        
 def process_front_raise(landmarks, side):
     """Advanced logic for front raises with movement prevention"""
     # Check posture
