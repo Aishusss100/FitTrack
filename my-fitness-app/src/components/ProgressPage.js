@@ -156,13 +156,13 @@ const ProgressPage = () => {
               className={viewType === "weekly" ? "active" : ""}
               onClick={() => setViewType("weekly")}
             >
-              Weekly
+              Last 7 days
             </button>
             <button
               className={viewType === "monthly" ? "active" : ""}
               onClick={() => setViewType("monthly")}
             >
-              Monthly
+              Last 30 days
             </button>
           </div>
         </div>

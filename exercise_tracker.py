@@ -11,7 +11,7 @@ import math
 import pyttsx3
 import time
 import uuid
-# Initialize MediaPipe
+
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -28,7 +28,6 @@ def announce_target_achieved():
     tts_engine.say("Target achieved!")
     tts_engine.runAndWait()
 
-# Global variables for exercise state management
 exercises = {
     'bicep_curl_left': {'counter': 0, 'stage': None},
     'bicep_curl_right': {'counter': 0, 'stage': None},
@@ -49,7 +48,6 @@ cap = None
 
 username = "default_user" 
 
-# Variables for autosaving progress
 last_saved_reps = 0
 autosave_thread = None
 should_stop_thread = False
@@ -78,15 +76,15 @@ def change_exercise(exercise_name):
     """Change the current exercise."""
     global current_exercise
 
-    # Validate if the exercise exists
+    
     if exercise_name not in exercises:
         print(f"Invalid exercise: {exercise_name}")
         return {'success': False, 'message': 'Exercise not found'}
 
-    current_exercise = exercise_name  # Set the current exercise
+    current_exercise = exercise_name 
     print(f"Current exercise changed to: {current_exercise}")
 
-    # Reset the stage for the selected exercise
+   
     exercises[current_exercise]['stage'] = None
     return {'success': True, 'message': f'Exercise changed to {current_exercise}'}
 
@@ -98,7 +96,7 @@ def set_target_reps(reps):
     target_achieved = False
     return {'target_reps': target_reps}
 
-# Fetch username dynamically from the backend
+
 def fetch_username():
     url = "http://localhost:5000/api/get_username"
     try:
@@ -112,11 +110,11 @@ def fetch_username():
         print(f"Error fetching username: {e}")
         return None
     
-# Define the backend API endpoint for updating progress
+
 API_URL = "http://localhost:5000/api/update_progress"
 
 def update_progress_api(exercise_name, reps, duration=0):
-    # Fetch the username dynamically
+    
     username = fetch_username()
     if not username:
         print("No user is logged in. Cannot update progress.")
@@ -144,12 +142,12 @@ def autosave_progress():
     global should_stop_thread, last_saved_reps, current_exercise, exercises
 
     while not should_stop_thread:
-        time.sleep(10)  # Wait for 10 seconds
+        time.sleep(10) 
 
         if exercise_started and current_exercise in exercises:
             current_reps = exercises[current_exercise]['counter']
 
-            # Only update if there are new reps
+            
             if current_reps > last_saved_reps:
                 reps_to_save = current_reps - last_saved_reps
                 success = update_progress_api(current_exercise, reps_to_save, duration=10)
@@ -162,7 +160,7 @@ def start_autosave_thread():
     """Start autosaving in a background thread."""
     global autosave_thread, should_stop_thread
 
-    should_stop_thread = False  # Reset the stopping flag
+    should_stop_thread = False  
 
     if autosave_thread is None or not autosave_thread.is_alive():
         autosave_thread = threading.Thread(target=autosave_progress)
@@ -173,10 +171,10 @@ def stop_autosave_thread():
     """Stop the autosave background thread gracefully."""
     global should_stop_thread, autosave_thread
 
-    should_stop_thread = True  # Tell the thread to stop
+    should_stop_thread = True  
 
     if autosave_thread and autosave_thread.is_alive():
-        autosave_thread.join(2)  # Wait for 2 seconds to allow cleanup
+        autosave_thread.join(2)  
 
 def start_exercise(exercise_name):
     """Start the exercise tracking and set the current exercise."""
@@ -185,22 +183,22 @@ def start_exercise(exercise_name):
 
     exercise_started = True
     target_achieved = False
-    current_exercise = exercise_name  # Set the current exercise
+    current_exercise = exercise_name 
     last_saved_reps = 0
     print(f"Current exercise set to: {current_exercise}")
 
-    # Reset counters for all exercises
+    
     for exercise in exercises.values():
         exercise['counter'] = 0
         exercise['stage'] = None
 
-    # Ensure proper initialization of video capture
-    if cap is None:
-        cap = cv2.VideoCapture(0)  # Initialize cap
-    elif not cap.isOpened():
-        cap.open(0)  # Open cap if it is closed
     
-    # Start autosave thread
+    if cap is None:
+        cap = cv2.VideoCapture(0)
+    elif not cap.isOpened():
+        cap.open(0)  
+    
+  
     should_stop_thread = False
     if autosave_thread is None or not autosave_thread.is_alive():
         autosave_thread = threading.Thread(target=autosave_progress)
@@ -217,23 +215,22 @@ def stop_exercise():
     exercise_started = False
     target_achieved = False
     
-    # Signal thread to stop
+    
     should_stop_thread = True
     if autosave_thread and autosave_thread.is_alive():
-        autosave_thread.join(2)  # Wait for up to 2 seconds for thread to finish
+        autosave_thread.join(2) 
     
-    # Calculate final reps that haven't been saved yet
     final_reps = 0
     if current_exercise and current_exercise in exercises:
         final_reps = exercises[current_exercise]['counter'] - last_saved_reps
     
-    # Get the current exercise data before stopping
+    
     exercise_data = {
         'exercise_name': current_exercise,
-        'reps': final_reps  # Only count unsaved reps
+        'reps': final_reps  
     }
     
-    # Release video capture
+  
     if cap is not None and cap.isOpened():
         cap.release()
         cap = None
@@ -257,15 +254,14 @@ def calculate_angle(a, b, c):
 
 import pygame
 
-# Initialize pygame mixer early in your program
+
 pygame.mixer.init()
 
-# Global variables for feedback
+
 tts_lock = threading.Lock()
 is_speaking = False
 temp_files_to_delete = []
 
-# Add a cleanup thread to handle file deletion
 def cleanup_worker():
     global temp_files_to_delete
     while True:
@@ -283,7 +279,7 @@ def cleanup_worker():
                     temp_files_to_delete.append(file_path)
         time.sleep(1.0)
 
-# Start the cleanup thread
+
 cleanup_thread = threading.Thread(target=cleanup_worker)
 cleanup_thread.daemon = True
 cleanup_thread.start()
@@ -294,7 +290,7 @@ def speak_feedback(text):
     
     with tts_lock:
         if is_speaking:
-            return False  # Skip if already speaking
+            return False  
         is_speaking = True
     
     def speak_worker():
@@ -305,24 +301,24 @@ def speak_feedback(text):
             os.makedirs(simple_dir, exist_ok=True)
             temp_file = f"{simple_dir}/tts_{unique_id}.mp3"
             
-            # Generate TTS file
+            
             tts = gTTS(text=text, lang='en', slow=False)
             tts.save(temp_file)
             
-            # Play the file with pygame
+            
             pygame.mixer.music.load(temp_file)
             pygame.mixer.music.play()
             
-            # Wait for playback to finish
+            
             while pygame.mixer.music.get_busy():
                 pygame.time.Clock().tick(10)
 
-            # Stop and unload to release file lock
+            
             pygame.mixer.music.stop()
             pygame.mixer.music.unload()
             
-            # Add to cleanup queue
-            time.sleep(0.1)  # Optional: ensure system is ready
+            
+            time.sleep(0.1)  
             temp_files_to_delete.append(temp_file)
 
         except Exception as e:
@@ -350,7 +346,7 @@ def check_posture(landmarks):
     
     # Added neck approximation (midpoint between shoulders, slightly higher)
     neck_x = (left_shoulder.x + right_shoulder.x) / 2
-    neck_y = ((left_shoulder.y + right_shoulder.y) / 2) - 0.03  # Slightly higher than shoulders
+    neck_y = ((left_shoulder.y + right_shoulder.y) / 2) - 0.03  
     
     # Calculate midpoints for shoulders and hips
     shoulder_midpoint_x = (left_shoulder.x + right_shoulder.x) / 2
@@ -358,7 +354,7 @@ def check_posture(landmarks):
     hip_midpoint_x = (left_hip.x + right_hip.x) / 2
     hip_midpoint_y = (left_hip.y + right_hip.y) / 2
     
-    # Define appropriate thresholds
+   
     SHOULDER_THRESHOLD = 0.060
     HIP_THRESHOLD = 0.025
     SIDEWAYS_ANGLE_THRESHOLD = 7  # Threshold in degrees for sideways leaning
@@ -457,15 +453,21 @@ def check_posture(landmarks):
         check_posture.good_posture_notification_time = 0
     if not hasattr(check_posture, 'issue_last_notified'):
         check_posture.issue_last_notified = {}
+    if not hasattr(check_posture, 'exercise_started_time'):
+        check_posture.exercise_started_time = time.time()
+    if not hasattr(check_posture, 'good_posture_streak'):
+        check_posture.good_posture_streak = 0
+    if not hasattr(check_posture, 'good_posture_confidence'):
+        check_posture.good_posture_confidence = 0.0
     
     current_time = time.time()
     
-    # Improve confidence system - track how consistently an issue is detected
-    confidence_decay = 0.7  # How quickly confidence decreases when issue not detected
-    confidence_increase = 0.3  # How quickly confidence increases when issue detected
-    confidence_threshold = 0.8  # Threshold to trigger notification
     
-    # Reset or decrease confidence for all issues not currently detected
+    confidence_decay = 0.7  
+    confidence_increase = 0.3  
+    confidence_threshold = 0.8 
+    
+   
     for issue in list(check_posture.issue_confidence.keys()):
         if issue != posture_issue:
             check_posture.issue_confidence[issue] = check_posture.issue_confidence[issue] * confidence_decay
@@ -491,28 +493,50 @@ def check_posture(landmarks):
     if posture_issue and posture_issue in check_posture.issue_confidence:
         confidence = check_posture.issue_confidence[posture_issue]
         
-        # Get the appropriate notification interval for this issue
+        
         notification_interval = notification_intervals.get(posture_issue, notification_intervals["default"])
         
-        # Check when this specific issue was last notified
+        
         last_notified = check_posture.issue_last_notified.get(posture_issue, 0)
         time_since_last_notification = current_time - last_notified
         
-        # Notify if confidence is high enough and enough time has passed since last notification of this issue
+        
         if confidence >= confidence_threshold and time_since_last_notification > notification_interval:
             should_notify = True
-            # Update the last notification time for this specific issue
+            
             check_posture.issue_last_notified[posture_issue] = current_time
     
-    # Good posture notification (less frequent)
-    good_posture_interval = 30.0  # Only notify about good posture every 30 seconds
-    if not posture_issue and current_time - check_posture.good_posture_notification_time > good_posture_interval:
-        # Clear all issue confidence when good posture is sustained
-        check_posture.issue_confidence.clear()
-        should_notify = True
-        check_posture.good_posture_notification_time = current_time
+   
+    good_posture_interval = 45.0  
+    good_posture_min_streak = 20  
+    warm_up_period = 15.0  
+    good_posture_confidence_threshold = 0.85  
     
-    # Provide feedback if needed
+    current_exercise_time = current_time - check_posture.exercise_started_time
+    
+    if not posture_issue:
+        check_posture.good_posture_streak += 1
+        
+        check_posture.good_posture_confidence += 0.05
+        check_posture.good_posture_confidence = min(1.0, check_posture.good_posture_confidence)
+        
+       
+        if (current_exercise_time > warm_up_period and 
+            check_posture.good_posture_streak >= good_posture_min_streak and 
+            check_posture.good_posture_confidence >= good_posture_confidence_threshold and
+            current_time - check_posture.good_posture_notification_time > good_posture_interval):
+            
+            
+            check_posture.issue_confidence.clear()
+            should_notify = True
+            check_posture.good_posture_notification_time = current_time
+    else:
+        
+        check_posture.good_posture_streak = 0
+        
+        check_posture.good_posture_confidence *= 0.5
+    
+   
     if should_notify:
         check_posture.last_issue = posture_issue
         check_posture.last_notification_time = current_time
@@ -525,7 +549,7 @@ def check_posture(landmarks):
             announce_feedback("Good posture detected")
             return "Posture Feedback: Good posture!"
     
-    # Return current status without announcing again
+
     if posture_issue:
         return f"Posture Feedback: Needs correction ({posture_issue})"
     else:
@@ -535,7 +559,7 @@ def generate_video_frames():
     """Generate video frames with pose detection and exercise tracking"""
     global exercises, current_exercise, target_reps, target_achieved, exercise_started, cap
     
-    # Initialize video capture if not already done
+   
     if cap is None or not cap.isOpened():
         cap = cv2.VideoCapture(0)
     
