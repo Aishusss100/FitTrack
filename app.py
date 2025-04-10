@@ -22,7 +22,7 @@ app.config['SESSION_COOKIE_SECURE'] = False
 # Initialize exercise tracker
 init_exercise_tracker()
 
-# Initialize user database
+
 def init_user_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -38,9 +38,9 @@ def init_user_db():
     conn.commit()
     conn.close()
 
-# Initialize progress tracking database
+
 def init_progress_db():
-    conn = sqlite3.connect('exercise_progress_with_duration.db')  # Updated database name
+    conn = sqlite3.connect('exercise_progress_with_duration.db')
     c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS exercise_progress_with_duration (
@@ -597,7 +597,7 @@ def get_goals():
     # First, clean up expired goals
     delete_expired_goals()
     
-    is_achieved = request.args.get('is_achieved', None)  # Filter by active/achieved goals
+    is_achieved = request.args.get('is_achieved', None)  
     username = session['username']
 
     conn = sqlite3.connect('exercise_progress_with_duration.db')
@@ -664,7 +664,6 @@ def delete_goal():
     finally:
         conn.close()
 
-# Update goal status (e.g., when a target is achieved)
 @app.route('/api/update_goal_status', methods=['POST'])
 def update_goal_status():
     if 'username' not in session:

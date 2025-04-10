@@ -1,13 +1,13 @@
 import sqlite3
 
 def fetch_user_goals():
-    conn = sqlite3.connect('exercise_progress_with_duration.db')  # Connect to the database
-    c = conn.cursor()  # Create a cursor object
+    conn = sqlite3.connect('users.db')  
+    c = conn.cursor()  
 
     try:
-        # Execute a query to fetch all the contents of the table
-        c.execute('SELECT * FROM user_goals')
-        rows = c.fetchall()  # Fetch all rows from the executed query
+        
+        c.execute('SELECT * FROM users')
+        rows = c.fetchall()  
 
         if rows:
             print("Contents of the user_goals table:")
@@ -18,7 +18,7 @@ def fetch_user_goals():
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")
     finally:
-        conn.close()  # Close the database connection
+        conn.close()  
 
-# Call the function
+
 fetch_user_goals()
