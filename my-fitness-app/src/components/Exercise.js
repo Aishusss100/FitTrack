@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./Exercise.css";
+import { useRef } from "react"; // add at top if not already
 
 // Import exercise GIFs
 import bicepCurlRightGif from "../assets/One-Arm-Biceps-Curl-right.gif";
@@ -28,6 +29,9 @@ const Exercise = () => {
     const [timerId, setTimerId] = useState(null);
     const [showInstructions, setShowInstructions] = useState(false);
 
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const [streaming, setStreaming] = useState(false);
     // State for individual instruction sections visibility
     const [showProperForm, setShowProperForm] = useState(false);
     const [showAngleDetails, setShowAngleDetails] = useState(false);
@@ -251,17 +255,48 @@ const Exercise = () => {
             setErrorMessage("Failed to set target repetitions. Please try again.");
         }
     };
+    const startWebcam = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+
+                // Fallback: manually wait a tiny bit before setting streaming
+                videoRef.current.onloadedmetadata = () => {
+                    console.log("📸 onloadedmetadata triggered");
+                    setStreaming(true);
+                };
+
+                // In case onloadedmetadata never triggers — fallback set
+                setTimeout(() => {
+                    if (!streaming) {
+                        console.log("⏱️ Fallback: setting streaming to true");
+                        setStreaming(true);
+                    }
+                }, 500);
+            } else {
+                console.warn("🚫 videoRef.current is null");
+            }
+        } catch (err) {
+            console.error("Webcam access error:", err);
+        }
+    };
+
 
     const handleStart = async () => {
+        console.log("Sending to /api/start:", exercise);
+
         try {
             await axios.post(
                 "http://localhost:5000/api/start",
                 { exercise },
                 { withCredentials: true }
             );
-            setTracking(true);
+
             setElapsedTime(0);
             setContainerState(COLORS.TRACKING);
+            setTracking(true); // ✅ first set this — it will mount <video>
 
             const intervalId = setInterval(() => {
                 setElapsedTime((prevTime) => prevTime + 1);
@@ -269,15 +304,27 @@ const Exercise = () => {
 
             setTimerId(intervalId);
         } catch (error) {
-            console.error(error);
+            console.error("START ERROR:", error);
             setErrorMessage("Failed to start exercise tracking. Please try again.");
         }
     };
+
+
 
     const handleStop = async () => {
         if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
         try {
+            // ✅ Stop webcam
+            if (videoRef.current?.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach((track) => track.stop());
+                videoRef.current.srcObject = null;
+            }
+            setStreaming(false);
+            setTracking(false);
+
+            // ✅ Your existing stop logic
             await axios.post(
                 "http://localhost:5000/api/stop",
                 {
@@ -287,7 +334,7 @@ const Exercise = () => {
                 },
                 { withCredentials: true }
             );
-            setTracking(false);
+
             clearInterval(timerId);
             setTimerId(null);
             setContainerState(COLORS.DEFAULT);
@@ -299,11 +346,142 @@ const Exercise = () => {
         }
     };
 
+    // Add debugging to identify where the issue occurs
+    const sendFrameToBackend = async () => {
+        console.log("🛰️ Sending frame to backend...");
+        
+        if (!videoRef.current || !canvasRef.current) {
+          console.log("🚫 videoRef or canvasRef is null");
+          return;
+        }
+        
+        try {
+          const context = canvasRef.current.getContext("2d");
+          
+          // Make sure video is playing and has dimensions before capturing
+          if (!videoRef.current.videoWidth || !videoRef.current.videoHeight) {
+            console.log("⚠️ Video dimensions not available yet");
+            return;
+          }
+          
+          // Set canvas size to match video
+          canvasRef.current.width = videoRef.current.videoWidth;
+          canvasRef.current.height = videoRef.current.videoHeight;
+          
+          // Draw video frame to canvas
+          context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+          console.log(`🖼️ Frame captured: ${canvasRef.current.width}x${canvasRef.current.height}`);
+          
+          // Create blob from canvas
+          canvasRef.current.toBlob(async (blob) => {
+            if (!blob) {
+              console.error("Failed to create blob from canvas");
+              return;
+            }
+            
+            console.log(`🧩 Blob created: ${blob.size} bytes`);
+            const formData = new FormData();
+            formData.append("frame", blob, "frame.jpg");
+            
+            try {
+              console.log("📤 Sending request to backend...");
+              const response = await axios.post(
+                "http://localhost:5000/api/process_frame",
+                formData,
+                {
+                  responseType: "blob",
+                  withCredentials: true,
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  },
+                  timeout: 5000 // Shorter timeout for faster feedback
+                }
+              );
+              
+              console.log("📥 Response received:", response.status);
+              
+              if (response.data && response.data.size > 0) {
+                console.log(`📊 Response data size: ${response.data.size} bytes`);
+                const imageUrl = URL.createObjectURL(response.data);
+                const imageElement = document.getElementById("processed-frame");
+                if (imageElement) {
+                  imageElement.src = imageUrl;
+                  imageElement.onload = () => console.log("🖼️ Image loaded successfully!");
+                  imageElement.onerror = (e) => console.error("🚫 Image failed to load:", e);
+                } else {
+                  console.error("❌ Image element not found");
+                }
+              } else {
+                console.error("Empty response data");
+                showErrorFrame("Empty Data");
+              }
+            } catch (error) {
+              console.error("❌ Axios error:", error);
+              showErrorFrame(`Error: ${error.message}`);
+            }
+          }, "image/jpeg", 0.9);
+        } catch (error) {
+          console.error("❌ Canvas error:", error);
+          showErrorFrame(`Canvas Error: ${error.message}`);
+        }
+      };
+      
+      // Helper function to show error message on the frame
+      const showErrorFrame = (message) => {
+        const imageElement = document.getElementById("processed-frame");
+        if (imageElement) {
+          const errorCanvas = document.createElement("canvas");
+          errorCanvas.width = 640;
+          errorCanvas.height = 480;
+          const ctx = errorCanvas.getContext("2d");
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, 640, 480);
+          ctx.fillStyle = "red";
+          ctx.font = "20px Arial";
+          ctx.fillText(message, 220, 240);
+          ctx.fillText("Check console for details", 180, 280);
+          
+          imageElement.src = errorCanvas.toDataURL();
+        }
+      }; 
     const formatTime = (timeInSeconds) => {
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = timeInSeconds % 60;
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
+    useEffect(() => {
+        if (tracking && videoRef.current && !streaming) {
+            console.log("🎬 Video DOM is ready, starting webcam...");
+            startWebcam(); // 👈 now videoRef is guaranteed
+        }
+    }, [tracking, videoRef, streaming]);
+
+    useEffect(() => {
+        console.log("🎯 useEffect | tracking:", tracking, "| streaming:", streaming);
+        let interval;
+        if (tracking && streaming) {
+            console.log("✅ Starting frame interval...");
+            interval = setInterval(sendFrameToBackend, 200);
+        }
+        return () => {
+            console.log("🛑 Clearing frame interval...");
+            clearInterval(interval);
+        };
+    }, [tracking, streaming]);
+
+    useEffect(() => {
+        const getCamera = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (err) {
+                console.error("Webcam error:", err);
+            }
+        };
+        getCamera();
+    }, []);
 
     const exerciseGif = getExerciseGif();
     const exerciseInstructions = getExerciseInstructions();
@@ -430,7 +608,6 @@ const Exercise = () => {
                                 Hide Instructions 🔼
                             </button>
                         </div>
-
                     )}
 
                     {/* Display the exercise GIF if available */}
@@ -447,40 +624,71 @@ const Exercise = () => {
                             />
                         </div>
                     )}
+
+                    {/* Move control elements to the left column */}
+                    <div className="exercise-controls">
+                        <div className="target-input">
+                            <label>Target Reps (Optional):</label>
+                            <input
+                                type="text"
+                                value={targetReps}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setTargetReps(value === '' ? '' : parseInt(value) || '');
+                                }}
+                                placeholder="Enter reps(<50)"
+                            />
+                            <button onClick={handleSetTarget}>Set Target</button>
+                        </div>
+
+                        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+                        <div className="buttons">
+                            <button onClick={handleStart} disabled={tracking}>Start</button>
+                            <button onClick={handleStop} disabled={!tracking}>Stop</button>
+                        </div>
+
+                        <div className="stopwatch">
+                            <h2>Time: {formatTime(elapsedTime)}</h2>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="exercise-right-column">
-                    <div className="target-input">
-                        <label>Target Reps (Optional):</label>
-                        <input
-                            type="text"
-                            value={targetReps}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                setTargetReps(value === '' ? '' : parseInt(value) || '');
-                            }}
-                            placeholder="Enter reps(<50)"
-                        />
-                        <button onClick={handleSetTarget}>Set Target</button>
-                    </div>
-
-                    {errorMessage && <div className="error-message">{errorMessage}</div>}
-
-                    <div className="buttons">
-                        <button onClick={handleStart} disabled={tracking}>Start</button>
-                        <button onClick={handleStop} disabled={!tracking}>Stop</button>
-                    </div>
-
-                    <div className="stopwatch">
-                        <h2>Time: {formatTime(elapsedTime)}</h2>
-                    </div>
-
                     {tracking && (
                         <div className="video-and-angle">
-                            <div className="video-feed">
-                                <h2>Video Feed</h2>
-                                <img src={`http://localhost:5000/api/video_feed?exercise=${exercise}`} alt="Video Feed" />
-                            </div>
+                            <h2>Processed Video Feed</h2>
+
+                            <video
+                                ref={videoRef}
+                                width="160"
+                                height="120"
+                                autoPlay
+                                muted
+                                onCanPlay={() => setStreaming(true)}
+                                style={{ border: "1px solid gray", borderRadius: "4px" }}
+                            />
+
+                            <canvas
+                                ref={canvasRef}
+                                width="640"
+                                height="480"
+                                style={{ display: "none" }}
+                            />
+
+                            <img
+                                id="processed-frame"
+                                alt="Processed Frame"
+                                width="640"
+                                height="480"
+                                style={{ border: "2px solid #000", borderRadius: "8px" }}
+                            />
+                        </div>
+                    )}
+                    {!tracking && (
+                        <div className="video-placeholder">
+                            <h2>Video Feed Will Appear Here</h2>
+                            <p>Press the Start button to begin tracking your exercise</p>
                         </div>
                     )}
                 </div>

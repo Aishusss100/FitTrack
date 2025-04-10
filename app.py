@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify, session, redirect, url_for, Response
+from flask import Flask, request, jsonify, session, redirect, url_for, Response,send_file
 from flask_cors import CORS
 import sqlite3
 from datetime import date, timedelta,datetime
-
+from PIL import ImageDraw,Image
+import io
 from exercise_tracker import (
     init_exercise_tracker,
     get_exercise_data,
@@ -10,7 +11,7 @@ from exercise_tracker import (
     set_target_reps,
     start_exercise,
     stop_exercise,
-    generate_video_frames
+    process_incoming_frame
 )
 
 app = Flask(__name__)
@@ -186,10 +187,15 @@ def set_target():
 
 @app.route('/api/start', methods=['POST'])
 def start_exercise_route():
-    data = request.get_json()
-    exercise_name = data.get('exercise')  # Get the exercise name from the frontend
+    print("Start API called")
+    if 'username' not in session:
+        print("User not logged in")
+        return jsonify({'message': 'Not logged in'}), 401
 
-    # Call the start_exercise function with the selected exercise
+    data = request.get_json()
+    exercise_name = data.get('exercise')
+    print("Exercise received from frontend:", exercise_name)
+
     result = start_exercise(exercise_name)
     return jsonify(result)
 
@@ -218,9 +224,9 @@ def stop_exercise_route():
     else:
         return jsonify({'message': 'Failed to stop exercise'}), 500
 
-@app.route('/api/video_feed')
-def video_feed():
-    return Response(generate_video_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/api/video_feed')
+# def video_feed():
+#     return Response(generate_video_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/api/get_username', methods=['GET'])
@@ -884,5 +890,58 @@ def update_profile():
     finally:
         conn.close()
         
+@app.route('/api/process_frame', methods=['POST'])
+def api_process_frame():
+    if 'username' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+        
+    if 'frame' not in request.files:
+        print("No frame in request")
+        return jsonify({'error': 'No frame received'}), 400
+        
+    try:
+        # Read the frame data
+        frame = request.files['frame'].read()
+        print(f"Received frame size: {len(frame)} bytes")
+        
+        if len(frame) == 0:
+            print("Empty frame received")
+            return jsonify({'error': 'Empty frame'}), 400
+            
+        # Process the frame
+        try:
+            processed_frame_io = process_incoming_frame(frame)
+            print("Frame processed successfully")
+            return send_file(processed_frame_io, mimetype='image/jpeg')
+        except Exception as e:
+            print(f"Error in process_incoming_frame: {str(e)}")
+            
+            # Return a simple error image instead of failing
+            img = Image.new('RGB', (640, 480), color = (0, 0, 0))
+            draw = ImageDraw.Draw(img)
+            draw.text((200, 240), f"Processing Error: {str(e)}", fill=(255, 0, 0))
+            
+            img_io = io.BytesIO()
+            img.save(img_io, 'JPEG')
+            img_io.seek(0)
+            return send_file(img_io, mimetype='image/jpeg')
+            
+    except Exception as e:
+        print(f"Error in api_process_frame: {str(e)}")
+        return jsonify({'error': f'Error processing frame: {str(e)}'}), 500
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+# Simple test endpoint
+@app.route('/api/test', methods=['GET'])
+def test_endpoint():
+    return jsonify({"status": "success", "message": "API is working"})
+ 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.config['SECRET_KEY'] = 'your_secret_key'
+    app.run(host='0.0.0.0', port=5000, debug=True)

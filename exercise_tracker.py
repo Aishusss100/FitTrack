@@ -11,6 +11,7 @@ import math
 import pyttsx3
 import time
 import uuid
+import io
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -178,7 +179,7 @@ def stop_autosave_thread():
 
 def start_exercise(exercise_name):
     """Start the exercise tracking and set the current exercise."""
-    global exercise_started, target_achieved, current_exercise, exercises, cap
+    global exercise_started, target_achieved, current_exercise, exercises
     global autosave_thread, should_stop_thread, last_saved_reps
 
     exercise_started = True
@@ -187,18 +188,12 @@ def start_exercise(exercise_name):
     last_saved_reps = 0
     print(f"Current exercise set to: {current_exercise}")
 
-    
+    # Reset all counters and stages
     for exercise in exercises.values():
         exercise['counter'] = 0
         exercise['stage'] = None
 
-    
-    if cap is None:
-        cap = cv2.VideoCapture(0)
-    elif not cap.isOpened():
-        cap.open(0)  
-    
-  
+    # Start autosave thread
     should_stop_thread = False
     if autosave_thread is None or not autosave_thread.is_alive():
         autosave_thread = threading.Thread(target=autosave_progress)
@@ -206,36 +201,35 @@ def start_exercise(exercise_name):
         autosave_thread.start()
 
     return {'success': True, 'message': f'{current_exercise} started'}
-
 def stop_exercise():
     """Stop the exercise tracking"""
-    global exercise_started, cap, target_achieved, current_exercise, exercises
-    global autosave_thread, should_stop_thread, last_saved_reps
-    
+    global exercise_started, target_achieved, current_exercise, exercises
+    global autosave_thread, should_stop_thread, last_saved_reps, cap
+
     exercise_started = False
     target_achieved = False
-    
-    
+
     should_stop_thread = True
     if autosave_thread and autosave_thread.is_alive():
-        autosave_thread.join(2) 
-    
+        autosave_thread.join(2)
+
     final_reps = 0
     if current_exercise and current_exercise in exercises:
         final_reps = exercises[current_exercise]['counter'] - last_saved_reps
-    
-    
+
     exercise_data = {
         'exercise_name': current_exercise,
-        'reps': final_reps  
+        'reps': final_reps
     }
-    
-  
-    if cap is not None and cap.isOpened():
-        cap.release()
+
+    # Camera release not needed anymore, but clean up if cap exists
+    if 'cap' in globals() and cap is not None and hasattr(cap, "release"):
+        if cap.isOpened():
+            cap.release()
         cap = None
-    
+
     return {'success': True, 'exercise_data': exercise_data}
+
 
 def calculate_angle(a, b, c):
     """Calculate the angle between three points"""
@@ -554,70 +548,40 @@ def check_posture(landmarks):
         return f"Posture Feedback: Needs correction ({posture_issue})"
     else:
         return "Posture Feedback: Good posture!"
+import io
+from flask import send_file
+from PIL import Image
 
-def generate_video_frames():
-    """Generate video frames with pose detection and exercise tracking"""
-    global exercises, current_exercise, target_reps, target_achieved, exercise_started, cap
-    
-   
-    if cap is None or not cap.isOpened():
-        cap = cv2.VideoCapture(0)
-    
-    with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-        while True:
-            success, frame = cap.read()
-            if not success or not exercise_started:
-                break
-            else:
-                # Recolor image to RGB
-                
-                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                image.flags.writeable = False
+def process_incoming_frame(frame_bytes):
+    np_arr = np.frombuffer(frame_bytes, np.uint8)
+    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    print("Received frame shape:", frame.shape if frame is not None else "None")
 
-                # Make detection
-                results = pose.process(image)
+    try:
+        with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = pose.process(image_rgb)
 
-                # Recolor back to BGR
-                image.flags.writeable = True
-                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-                # Extract landmarks
-                try:
-                    landmarks = results.pose_landmarks.landmark
-
-                    if current_exercise == 'bicep_curl_left':
-                        process_bicep_curl(landmarks, side='LEFT')
-                        shoulderl = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                            landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                        elbowl = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
-                        wristl = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-                        angle = calculate_angle(shoulderl, elbowl, wristl)
-                        # Convert landmark coordinates to screen pixels
-                        h, w, _ = image.shape
-                        elbowl_x, elbowl_y = int(elbowl[0] * w), int(elbowl[1] * h)
-                        # Display angle on screen at elbow point
-                        cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
-
-                    elif current_exercise == 'bicep_curl_right':
-                        process_bicep_curl(landmarks, side='RIGHT')
-                        shoulderr = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                            landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-                        elbowr = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
-                        wristr = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                        angle = calculate_angle(shoulderr, elbowr, wristr)
-                        # Convert landmark coordinates to screen pixels
-                        h, w, _ = image.shape
-                        elbowr_x, elbowr_y = int(elbowr[0] * w), int(elbowr[1] * h)
-                        # Display angle on screen at elbow point
-                        cv2.putText(image, str(int(angle)), (elbowr_x, elbowr_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
-
-                    elif current_exercise == 'overhead_press_left':
+            if results.pose_landmarks:
+                landmarks = results.pose_landmarks.landmark
+                # Call exercise logic
+                if current_exercise == 'bicep_curl_left':
+                    process_bicep_curl(landmarks, side='LEFT')
+                    shoulderl = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                        landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                    elbowl = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+                    wristl = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+                    angle = calculate_angle(shoulderl, elbowl, wristl)
+                    # Convert landmark coordinates to screen pixels
+                    h, w, _ = image.shape
+                    elbowl_x, elbowl_y = int(elbowl[0] * w), int(elbowl[1] * h)
+                    # Display angle on screen at elbow point
+                    cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'overhead_press_left':
                         process_overhead_press(landmarks, side='LEFT')
                         shoulderl = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                             landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
@@ -633,168 +597,154 @@ def generate_video_frames():
                         cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'overhead_press_right':
-                        process_overhead_press(landmarks, side='RIGHT')
-                        shoulderr = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                            landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-                        elbowr = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
-                        wristr = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                        angle = calculate_angle(shoulderr, elbowr, wristr)
-                        # Convert landmark coordinates to screen pixels
-                        h, w, _ = image.shape
-                        elbowr_x, elbowr_y = int(elbowr[0] * w), int(elbowr[1] * h)
-                        # Display angle on screen at elbow point
-                        cv2.putText(image, str(int(angle)), (elbowr_x, elbowr_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'overhead_press_right':
+                    process_overhead_press(landmarks, side='RIGHT')
+                    shoulderr = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                        landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                    elbowr = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+                    wristr = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                    angle = calculate_angle(shoulderr, elbowr, wristr)
+                    # Convert landmark coordinates to screen pixels
+                    h, w, _ = image.shape
+                    elbowr_x, elbowr_y = int(elbowr[0] * w), int(elbowr[1] * h)
+                    # Display angle on screen at elbow point
+                    cv2.putText(image, str(int(angle)), (elbowr_x, elbowr_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'lateral_raise_left':
-                        process_lateral_raise(landmarks, side='LEFT')
-                        shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                                    landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                        waist = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-                        wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-                        angle = calculate_angle(waist ,shoulder, wrist)
-                        h, w, _ = image.shape
-                        shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
-                        # Display angle on screen at shoulder point
-                        cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'lateral_raise_left':
+                    process_lateral_raise(landmarks, side='LEFT')
+                    shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                                landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                    waist = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+                    wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+                    angle = calculate_angle(waist ,shoulder, wrist)
+                    h, w, _ = image.shape
+                    shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
+                    # Display angle on screen at shoulder point
+                    cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'lateral_raise_right':
-                        process_lateral_raise(landmarks, side='RIGHT')
-                        shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                                    landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-                        waist = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
-                        wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                        angle = calculate_angle(waist ,shoulder, wrist)
-                        h, w, _ = image.shape
-                        shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
-                        # Display angle on screen at shoulder point
-                        cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'lateral_raise_right':
+                    process_lateral_raise(landmarks, side='RIGHT')
+                    shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                                landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                    waist = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
+                    wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                    angle = calculate_angle(waist ,shoulder, wrist)
+                    h, w, _ = image.shape
+                    shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
+                    # Display angle on screen at shoulder point
+                    cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'front_raise_left':
-                        process_front_raise(landmarks, side='LEFT')
-                        shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                                    landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                        waist = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-                        wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-                        angle = calculate_angle(wrist, shoulder, waist)
-                        h, w, _ = image.shape
-                        shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
-                        # Display angle on screen at shoulder point
-                        cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'front_raise_left':
+                    process_front_raise(landmarks, side='LEFT')
+                    shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                                landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                    waist = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
+                    wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+                    angle = calculate_angle(wrist, shoulder, waist)
+                    h, w, _ = image.shape
+                    shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
+                    # Display angle on screen at shoulder point
+                    cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'front_raise_right':
-                        process_front_raise(landmarks, side='RIGHT')
-                        shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                                    landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-                        waist = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
-                        wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                        angle = calculate_angle(wrist, shoulder, waist)
-                        h, w, _ = image.shape
-                        shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
-                        # Display angle on screen at shoulder point
-                        cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'front_raise_right':
+                    process_front_raise(landmarks, side='RIGHT')
+                    shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                                landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                    waist = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
+                    wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                    angle = calculate_angle(wrist, shoulder, waist)
+                    h, w, _ = image.shape
+                    shoulder_x, shoulder_y = int(shoulder[0] * w), int(shoulder[1] * h)
+                    # Display angle on screen at shoulder point
+                    cv2.putText(image, str(int(angle)), (shoulder_x, shoulder_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'single_arm_dumbbell_left':
-                        process_single_arm_dumbbell(landmarks, side='LEFT')
-                        shoulderl = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                            landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                        elbowl = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
-                        wristl = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-                        angle = calculate_angle(shoulderl, elbowl, wristl)
-                        # Convert landmark coordinates to screen pixels
-                        h, w, _ = image.shape
-                        elbowl_x, elbowl_y = int(elbowl[0] * w), int(elbowl[1] * h)
-                        # Display angle on screen at elbow point
-                        cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'single_arm_dumbbell_left':
+                    process_single_arm_dumbbell(landmarks, side='LEFT')
+                    shoulderl = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                        landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                    elbowl = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+                    wristl = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+                    angle = calculate_angle(shoulderl, elbowl, wristl)
+                    # Convert landmark coordinates to screen pixels
+                    h, w, _ = image.shape
+                    elbowl_x, elbowl_y = int(elbowl[0] * w), int(elbowl[1] * h)
+                    # Display angle on screen at elbow point
+                    cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    elif current_exercise == 'single_arm_dumbbell_right':
-                        process_single_arm_dumbbell(landmarks, side='RIGHT')
-                        shoulderr = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                            landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-                        elbowr = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
-                        wristr = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
-                                landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                        angle = calculate_angle(shoulderr, elbowr, wristr)
-                        # Convert landmark coordinates to screen pixels
-                        h, w, _ = image.shape
-                        elbowr_x, elbowr_y = int(elbowr[0] * w), int(elbowr[1] * h)
-                        # Display angle on screen at elbow point
-                        cv2.putText(image, str(int(angle)), (elbowr_x, elbowr_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'single_arm_dumbbell_right':
+                    process_single_arm_dumbbell(landmarks, side='RIGHT')
+                    shoulderr = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                        landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                    elbowr = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+                    wristr = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                    angle = calculate_angle(shoulderr, elbowr, wristr)
+                    # Convert landmark coordinates to screen pixels
+                    h, w, _ = image.shape
+                    elbowr_x, elbowr_y = int(elbowr[0] * w), int(elbowr[1] * h)
+                    # Display angle on screen at elbow point
+                    cv2.putText(image, str(int(angle)), (elbowr_x, elbowr_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
 
-                    # Announce when the target is achieved
-                    if target_achieved:
-                    # Display achievement on screen
-                        # cv2.putText(image, 'Target Achieved!', (15, 170), 
-                        #         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-                    
-                    # Only announce once and then stop tracking
-                        if exercise_started:
-                            announce_target_achieved()
-                            exercise_started = False  # Stop future iterations
-                            target_achieved = False
-                            # Call stop_exercise if it exists (wrap in try/except in case it doesn't)
-                            stop_result = stop_exercise()
 
-                except Exception as e:
-                    print(f"Error processing frame: {e}")
-                    pass
+                # Target Achieved message & logic
+                global exercise_started, target_achieved
+                if target_achieved:
+                    if exercise_started:
+                        announce_target_achieved()
+                        exercise_started = False
+                        target_achieved = False
+                        stop_exercise()
 
-                # Render curl counter
+                # Render REPS and STAGE box
                 cv2.rectangle(image, (0, 0), (255, 170), (245, 117, 245), 0)
 
-                # Rep data
-                cv2.putText(image, 'REPS', (15, 32), 
-                            cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 1, cv2.LINE_AA)  # Change to black
-                cv2.putText(image, str(exercises[current_exercise]['counter']), 
-                            (10, 120), 
+                # REPS
+                cv2.putText(image, 'REPS', (15, 32),
+                            cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 1, cv2.LINE_AA)
+                cv2.putText(image, str(exercises[current_exercise]['counter']),
+                            (10, 120),
                             cv2.FONT_HERSHEY_DUPLEX, 2, (0, 0, 0), 2, cv2.LINE_AA)
 
-                # Stage data
-                cv2.putText(image, 'STAGE', (105, 32), 
-                            cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 1, cv2.LINE_AA)  # Change to black
-                cv2.putText(image, exercises[current_exercise]['stage'] or "", 
-                            (90, 120), 
+                # STAGE
+                cv2.putText(image, 'STAGE', (105, 32),
+                            cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 1, cv2.LINE_AA)
+                cv2.putText(image, exercises[current_exercise]['stage'] or "",
+                            (90, 120),
                             cv2.FONT_HERSHEY_DUPLEX, 2, (0, 0, 0), 2, cv2.LINE_AA)
 
-                # if target_achieved:
-                #     cv2.putText(image, 'Target Achieved!', (15, 80), 
-                #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+                # Landmarks
+                mp_drawing.draw_landmarks(
+                    image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                    mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2),
+                    mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2)
+                )
 
-                # Render landmarks
-                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                         mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2), 
-                                         mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2))
-                
-                # Encode frame
-                ret, buffer = cv2.imencode('.jpg', image)
-                frame = buffer.tobytes()
+    except Exception as e:
+        print("Error processing frame:", e)
 
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-    # Release video capture after the loop ends
-    if cap is not None and cap.isOpened():
-        cap.release()
-    
+    _, buffer = cv2.imencode('.jpg', image)
+    return io.BytesIO(buffer)
+
 
 def process_bicep_curl(landmarks, side):
     """Logic for bicep curls (left/right) with elbow position check"""

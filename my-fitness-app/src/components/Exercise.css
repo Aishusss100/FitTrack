@@ -9,7 +9,6 @@ body {
     background-color: #f4f4f8;
     font-family: 'Poppins', 'Arial', sans-serif;
     line-height: 1.6;
-    /* Add padding to the top of the body */
     padding-top: 100px;
 }
 
@@ -17,11 +16,11 @@ body {
 .exercise-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
-    padding: 60px 20px 40px 20px; /* Increased top padding from 40px to 60px */
-    transition: background-color 0.5s ease;
-    margin-top: 20px; /* Added margin at the top */
+    padding: 40px 20px;
+    transition: all 0.5s ease;
+    margin-top: 20px;
 }
 
 .exercise-container.default {
@@ -49,26 +48,25 @@ body {
         0 15px 35px rgba(0, 0, 0, 0.1), 
         0 5px 15px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    min-height: 75vh;
+    min-height: 80vh;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    margin-top: 20px; /* Added margin at the top of the grid */
+    position: relative;
 }
 
 /* Left column styling */
 .exercise-left-column {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 10px;
-    padding-top:80px;
+    padding: 40px 30px;
     background: linear-gradient(135deg, #800000 0%, #660000 100%);
     color: white;
+    overflow-y: auto;
+    max-height: 80vh;
 }
 
 .exercise-left-column h1 {
     text-align: center;
     margin-bottom: 30px;
-    margin-top: 20px; /* Added margin at the top of the heading */
     font-size: 2.5rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -78,311 +76,71 @@ body {
     -webkit-background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Instructions box styling */
-.instructions {
-    width: 100%;
+/* Detailed instructions styling */
+.detailed-instructions {
     background: rgba(255, 255, 255, 0.1);
     padding: 25px;
     border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    margin-top: 15px; /* Added top margin */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    margin-bottom: 30px;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-.instructions h2 {
-    margin-bottom: 15px;
-    margin-top: 10px; /* Added top margin */
-    font-size: 1.5rem;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.detailed-instructions h2 {
+    margin-bottom: 25px;
+    font-size: 1.8rem;
     text-align: center;
     color: #ffffff;
     position: relative;
 }
 
-.instructions h2::after {
+.detailed-instructions h2::after {
     content: '';
     position: absolute;
     bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 50px;
+    width: 60px;
     height: 3px;
     background: white;
+    border-radius: 3px;
 }
 
-.instructions p {
-    margin: 10px 0;
-    font-size: 16px;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
-    padding-left: 15px;
-    position: relative;
-}
-
-.instructions p::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: white;
-}
-
-/* Right column styling */
-.exercise-right-column {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 50px;
-    transition: background-color 0.5s ease;
-}
-
-/* Right column color change when tracking */
-.tracking .exercise-right-column {
-    background: linear-gradient(135deg, #f0d0d0, #c98080);
-}
-
-/* Target input styling */
-.target-input {
-    margin-top: 20px; /* Added top margin */
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-}
-
-.target-input label {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-}
-
-.target-input input {
-    width: 200px;
-    padding: 12px;
-    border: 2px solid #800000;
-    border-radius: 10px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    outline: none;
-}
-
-.target-input input:focus {
-    border-color: #660000;
-    box-shadow: 0 0 15px rgba(128, 0, 0, 0.2);
-}
-
-.target-input button {
-    padding: 12px 25px;
-    background-color: #800000;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.target-input button:hover {
-    background-color: #660000;
-}
-
-/* Target button active state */
-.target-set .target-input button {
-    background-color: #550000;
-    box-shadow: 0 0 15px rgba(128, 0, 0, 0.4);
-}
-
-/* Buttons styling */
-.buttons {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
-    margin-top: 15px; /* Added top margin */
-}
-
-.buttons button {
-    padding: 12px 30px;
-    font-size: 16px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-}
-
-.buttons button:first-child {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.buttons button:last-child {
-    background-color: #f44336;
-    color: white;
-}
-
-.buttons button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.buttons button:hover:not(:disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-/* Error message styling */
-.error-message {
-    color: #d32f2f;
-    background-color: #ffebee;
-    padding: 12px;
-    border-radius: 8px;
+.instruction-section {
     margin-bottom: 20px;
-    margin-top: 15px; /* Added top margin */
-    text-align: center;
-    font-size: 14px;
-    max-width: 400px;
-    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 20px;
+    transition: all 0.3s ease;
 }
 
-/* Stopwatch styling */
-.stopwatch {
-    background-color: #333;
-    color: #fff;
-    padding: 15px 25px;
-    border-radius: 10px;
-    font-size: 24px;
-    margin-bottom: 30px;
-    margin-top: 15px; /* Added top margin */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    text-align: center;
-    letter-spacing: 2px;
+.instruction-section:last-child {
+    border-bottom: none;
+    margin-bottom: 10px;
 }
-
-/* Video feed styling */
-.video-and-angle {
-    width: 100%;
-    max-width: 600px;
-    margin-top: 15px; /* Added top margin */
-}
-
-.video-feed {
-    background-color: #f0f0f0;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.video-feed h2 {
-    background-color: #800000;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    margin: 0;
-}
-
-.video-feed img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* Exercise demo styling */
-.exercise-demo {
-    margin-top: 30px; /* Increased top margin from 20px to 30px */
-    padding: 15px;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.exercise-demo h2 {
-    margin-top: 10px; /* Added top margin */
-    margin-bottom: 15px;
-    color: #333;
-    font-size: 1.2rem;
-}
-
-.exercise-gif {
-    width: 120px;
-    max-width: 300px;
-    border-radius: 5px;
-    display: block;
-    margin: 0 auto;
-}
-.lateral-raise {
-    width:500px; /* Larger size */
-}
-/* Responsive design */
-@media (max-width: 1200px) {
-    .exercise-grid {
-        max-width: 95%;
-        gap: 20px;
-    }
-}
-
-@media (max-width: 768px) {
-    .exercise-grid {
-        grid-template-columns: 1fr;
-        gap: 0;
-        min-height: auto;
-        margin-top: 30px; /* Increased top margin for mobile */
-    }
-
-    .exercise-left-column,
-    .exercise-right-column {
-        padding: 30px;
-    }
-
-    .exercise-left-column h1 {
-        font-size: 2rem;
-        margin-top: 30px; /* Added more top margin for mobile */
-    }
-
-    .target-input {
-        flex-direction: column;
-        align-items: center;
-        margin-top: 30px; /* Increased top margin for mobile */
-    }
-
-    .target-input input,
-    .target-input button {
-        width: 100%;
-        max-width: 300px;
-    }
-
-    .buttons {
-        flex-direction: column;
-        width: 100%;
-        margin-top: 25px; /* Increased top margin for mobile */
-    }
-
-    .buttons button {
-        width: 100%;
-    }
-    
-    .exercise-gif {
-        max-width: 250px;
-    }
-}
-.mirrored {
-    transform: scaleX(-1);
-}
-
-/* Add these styles to your Exercise.css file */
 
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    padding: 5px 0;
 }
 
 .section-header h3 {
     margin: 0;
+    font-size: 1.4rem;
+    color: #fff;
+    font-weight: 600;
 }
 
 /* Toggle Button Styling */
@@ -391,7 +149,7 @@ body {
     border: none;
     border-radius: 8px;
     padding: 8px 16px;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: white;
     cursor: pointer;
@@ -412,60 +170,499 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-.detail-toggle-btn span {
-    transition: transform 0.3s ease;
-}
-
-/* Rotate arrow when toggled */
-.detail-toggle-btn.toggled span {
-    transform: rotate(180deg);
-}
-/* Enhanced Show Instructions Button */
+/* Instructions Toggle Button */
 .instructions-toggle-btn {
-    background: linear-gradient(135deg, #8B0000, #A52A2A); /* Deep maroon gradient */
+    background: linear-gradient(135deg, #8B0000, #A52A2A);
     color: white;
     border: none;
     padding: 12px 28px;
-    font-size: 18px;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
     border-radius: 10px;
     transition: all 0.3s ease-in-out;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 5px 12px rgba(139, 0, 0, 0.3);
+    margin: 20px auto;
+    display: block;
+    width: fit-content;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Hover Effect */
 .instructions-toggle-btn:hover {
     background: linear-gradient(135deg, #A52A2A, #B22222);
-    transform: scale(1.1);
-    box-shadow: 0 7px 18px rgba(165, 42, 42, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Click Effect */
 .instructions-toggle-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 3px 8px rgba(139, 0, 0, 0.3);
+    transform: translateY(1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Icon Animation */
-.instructions-toggle-btn span {
-    transition: transform 0.3s ease-in-out;
+/* List styling */
+.detailed-instructions ol,
+.detailed-instructions ul {
+    margin-left: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.8;
 }
 
-/* Rotate icon when toggled */
-.instructions-toggle-btn.toggled span {
-    transform: rotate(180deg);
+.detailed-instructions li {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 5px;
 }
 
-.instruction-section {
+.detailed-instructions ul li::before {
+    content: '•';
+    position: absolute;
+    left: -15px;
+    color: white;
+}
+
+/* Exercise demo styling */
+.exercise-demo {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    text-align: center;
+}
+
+.exercise-demo h2 {
     margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
 }
 
-.instruction-section:last-child {
-    border-bottom: none;
+.exercise-demo h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: white;
+    border-radius: 3px;
+}
+
+.exercise-gif {
+    width: 100%;
+    max-width: 250px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.exercise-gif:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.lateral-raise {
+    width: 100%;
+    max-width: 300px;
+}
+
+.mirrored {
+    transform: scaleX(-1);
+}
+
+/* Exercise controls styling */
+.exercise-controls {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    margin-top: auto;
+}
+
+/* Target input styling */
+.target-input {
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.target-input label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    flex: 1 0 100%;
+    margin-bottom: 10px;
+}
+
+.target-input input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+    color: white;
+}
+
+.target-input input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.target-input input:focus {
+    border-color: white;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.target-input button {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #9d0208, #6a040f);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.target-input button:hover {
+    background: linear-gradient(135deg, #6a040f, #370617);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.target-input button:active {
+    transform: translateY(1px);
+}
+
+/* Error message styling */
+.error-message {
+    color: #ffffff;
+    background-color: rgba(255, 87, 87, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(255, 87, 87, 0.3);
+    border-left: 5px solid #ff3333;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Buttons styling */
+.buttons {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.buttons button {
+    flex: 1;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.buttons button:first-child {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    color: white;
+}
+
+.buttons button:last-child {
+    background: linear-gradient(135deg, #f44336, #c62828);
+    color: white;
+}
+
+.buttons button:disabled {
+    background: linear-gradient(135deg, #9e9e9e, #757575);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.buttons button:hover:not(:disabled) {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.buttons button:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Stopwatch styling */
+.stopwatch {
+    background: linear-gradient(135deg, #333333, #222222);
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 15px;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    letter-spacing: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stopwatch h2 {
+    margin: 0;
+    font-weight: 700;
+    background: linear-gradient(to right, #ffffff, #cccccc);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Right column styling */
+.exercise-right-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    transition: all 0.5s ease;
+    position: relative;
+}
+
+/* Right column color change when tracking */
+.tracking .exercise-right-column {
+    background: linear-gradient(135deg, #f1f1f1, #e0e0e0);
+}
+
+/* Video and angle styling */
+.video-and-angle {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.video-and-angle h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 1.8rem;
+    text-align: center;
+    position: relative;
+}
+
+.video-and-angle h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: #800000;
+    border-radius: 3px;
+}
+
+/* Video placeholder styling */
+.video-placeholder {
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 640px;
+    height: 480px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #ccc;
+}
+
+.video-placeholder h2 {
+    color: #555;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.video-placeholder p {
+    color: #777;
+    font-size: 1.1rem;
+}
+
+/* Processed frame styling */
+#processed-frame {
+    border: 4px solid #800000 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Small video preview styling */
+video {
+    border: 3px solid #800000 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    z-index: 10;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .exercise-grid {
+        max-width: 95%;
+        gap: 30px;
+    }
+    
+    .exercise-left-column,
+    .exercise-right-column {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 992px) {
+    .exercise-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .exercise-left-column {
+        max-height: none;
+        overflow-y: visible;
+        padding-bottom: 40px;
+    }
+    
+    .exercise-right-column {
+        padding-top: 40px;
+    }
+    
+    .detailed-instructions,
+    .exercise-demo,
+    .exercise-controls {
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .video-and-angle {
+        max-width: 700px;
+    }
+    
+    #processed-frame {
+        width: 100%;
+        height: auto;
+    }
+    
+    .target-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .target-input label {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 80px;
+    }
+    
+    .exercise-container {
+        padding: 20px 15px;
+    }
+    
+    .exercise-left-column h1 {
+        font-size: 2rem;
+    }
+    
+    .detailed-instructions h2,
+    .exercise-demo h2,
+    .video-and-angle h2 {
+        font-size: 1.5rem;
+    }
+    
+    .section-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .buttons {
+        flex-direction: column;
+    }
+    
+    .buttons button {
+        width: 100%;
+    }
+    
+    .stopwatch {
+        font-size: 1.2rem;
+    }
+    
+    video {
+        top: 15px;
+        right: 15px;
+        width: 100px !important;
+        height: auto !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .exercise-left-column,
+    .exercise-right-column {
+        padding: 20px 15px;
+    }
+    
+    .exercise-left-column h1 {
+        font-size: 1.7rem;
+        margin-bottom: 20px;
+    }
+    
+    .detailed-instructions,
+    .exercise-demo,
+    .exercise-controls {
+        padding: 15px;
+    }
+    
+    .video-placeholder {
+        padding: 30px 15px;
+    }
+}
+
+/* Animation for exercise rep counting */
+@keyframes repCount {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.rep-counted {
+    animation: repCount 0.5s ease-in-out;
 }
