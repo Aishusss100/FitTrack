@@ -3,42 +3,42 @@ import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
 const Sidebar = ({ onClose }) => {
-  const [username, setUsername] = useState(""); // State to hold the username
-  const [error, setError] = useState(null); // State to handle any errors
-  
-  // Fetch username from the backend
+  const [username, setUsername] = useState(""); 
+  const [error, setError] = useState(null); 
+
   useEffect(() => {
     const fetchUsername = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/get_username", {
           method: "GET",
-          credentials: "include", // Include cookies for session
+          credentials: "include",
         });
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch username");
         }
-        
+
         const data = await response.json();
-        setUsername(data.username); // Update username state
+        setUsername(data.username);
       } catch (err) {
         console.error(err);
-        setError("User not logged in"); // Set error message if any
+        setError("User not logged in");
       }
     };
-    
+
     fetchUsername();
-  }, []); // Run only on component mount
-  
+  }, []);
+
   return (
     <div className="sidebar">
       {/* Sidebar Header */}
       <div className="sidebar-header">
-        <h2 className="username">{error || username}</h2> {/* Display username or error */}
+        <h2 className="username">{error || username}</h2>
         <button className="sidebar-button back-button" onClick={onClose}>
-          ← {/* Back arrow */}
+          ←
         </button>
       </div>
+
       {/* Sidebar Navigation */}
       <nav className="sidebar-nav">
         <NavLink
@@ -68,6 +68,13 @@ const Sidebar = ({ onClose }) => {
           onClick={onClose}
         >
           Goal Tracker
+        </NavLink>
+        <NavLink
+          to="/about"
+          className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}
+          onClick={onClose}
+        >
+          About
         </NavLink>
       </nav>
     </div>

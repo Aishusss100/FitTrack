@@ -942,6 +942,28 @@ def add_cors_headers(response):
 def test_endpoint():
     return jsonify({"status": "success", "message": "API is working"})
  
+
+from exercise_tracker import get_latest_event
+
+@app.route('/api/get_event', methods=['GET'])
+def get_event():
+    from exercise_tracker import latest_event_message
+    message = get_latest_event()
+
+    # Clear the message after sending once
+    if message:
+        # Reset the feedback message after reading it
+        from exercise_tracker import clear_latest_event
+        clear_latest_event()
+
+    return jsonify({'event': message or ""})
+
+
+
+
+
+
+
 if __name__ == "__main__":
     app.config['SECRET_KEY'] = 'your_secret_key'
     app.run(host='0.0.0.0', port=5000, debug=True)

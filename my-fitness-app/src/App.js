@@ -16,6 +16,7 @@ import Profile from "./components/Profile";
 import Sidebar from "./components/TempSidebar"; 
 import ProgressPage from "./components/ProgressPage";
 import GoalTrackerPage from "./components/GoalTrackerPage";
+import About from "./components/About"; // or "./pages/About" depending on where you place it
 import "./App.css";
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
         <Route path="/progress" element={<ProgressPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/goals" element={<GoalTrackerPage />} /> {/* New Goal Tracker Route */}
+        <Route path="/about" element={<About />} /> {/* ✅ NEW: About Page */}
         <Route path="/" element={<Navigate to="/splash" />} /> {/* Redirect "/" to Splash */}
       </Routes>
     </div>

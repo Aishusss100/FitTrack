@@ -28,6 +28,9 @@ const Exercise = () => {
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerId, setTimerId] = useState(null);
     const [showInstructions, setShowInstructions] = useState(false);
+    const [eventMessage, setEventMessage] = useState("");
+    const [isFrontCamera, setIsFrontCamera] = useState(true); // 👈 Default to front camera
+    const [stream, setStream] = useState(null);               // 👈 To manage stopping/starting
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -257,30 +260,44 @@ const Exercise = () => {
     };
     const startWebcam = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            // 🛑 Stop any previous stream
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: {
+                    facingMode: isFrontCamera ? "user" : "environment"
+                },
+                audio: false
+            };
+
+            const newStream = await navigator.mediaDevices.getUserMedia(constraints);
 
             if (videoRef.current) {
-                videoRef.current.srcObject = stream;
+                videoRef.current.srcObject = newStream;
 
-                // Fallback: manually wait a tiny bit before setting streaming
                 videoRef.current.onloadedmetadata = () => {
                     console.log("📸 onloadedmetadata triggered");
                     setStreaming(true);
                 };
 
-                // In case onloadedmetadata never triggers — fallback set
                 setTimeout(() => {
                     if (!streaming) {
                         console.log("⏱️ Fallback: setting streaming to true");
                         setStreaming(true);
                     }
                 }, 500);
-            } else {
-                console.warn("🚫 videoRef.current is null");
             }
+
+            setStream(newStream);
         } catch (err) {
             console.error("Webcam access error:", err);
+            alert("Camera access failed. Please allow camera or try a different browser.");
         }
+    };
+    const handleToggleCamera = () => {
+        setIsFrontCamera(prev => !prev); // ✅ Will restart webcam via useEffect
     };
 
 
@@ -288,6 +305,7 @@ const Exercise = () => {
         console.log("Sending to /api/start:", exercise);
 
         try {
+            setIsFrontCamera(true); // Always start with front camera
             await axios.post(
                 "http://localhost:5000/api/start",
                 { exercise },
@@ -349,112 +367,119 @@ const Exercise = () => {
     // Add debugging to identify where the issue occurs
     const sendFrameToBackend = async () => {
         console.log("🛰️ Sending frame to backend...");
-        
+
         if (!videoRef.current || !canvasRef.current) {
-          console.log("🚫 videoRef or canvasRef is null");
-          return;
-        }
-        
-        try {
-          const context = canvasRef.current.getContext("2d");
-          
-          // Make sure video is playing and has dimensions before capturing
-          if (!videoRef.current.videoWidth || !videoRef.current.videoHeight) {
-            console.log("⚠️ Video dimensions not available yet");
+            console.log("🚫 videoRef or canvasRef is null");
             return;
-          }
-          
-          // Set canvas size to match video
-          canvasRef.current.width = videoRef.current.videoWidth;
-          canvasRef.current.height = videoRef.current.videoHeight;
-          
-          // Draw video frame to canvas
-          context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-          console.log(`🖼️ Frame captured: ${canvasRef.current.width}x${canvasRef.current.height}`);
-          
-          // Create blob from canvas
-          canvasRef.current.toBlob(async (blob) => {
-            if (!blob) {
-              console.error("Failed to create blob from canvas");
-              return;
-            }
-            
-            console.log(`🧩 Blob created: ${blob.size} bytes`);
-            const formData = new FormData();
-            formData.append("frame", blob, "frame.jpg");
-            
-            try {
-              console.log("📤 Sending request to backend...");
-              const response = await axios.post(
-                "http://localhost:5000/api/process_frame",
-                formData,
-                {
-                  responseType: "blob",
-                  withCredentials: true,
-                  headers: {
-                    'Content-Type': 'multipart/form-data'
-                  },
-                  timeout: 5000 // Shorter timeout for faster feedback
-                }
-              );
-              
-              console.log("📥 Response received:", response.status);
-              
-              if (response.data && response.data.size > 0) {
-                console.log(`📊 Response data size: ${response.data.size} bytes`);
-                const imageUrl = URL.createObjectURL(response.data);
-                const imageElement = document.getElementById("processed-frame");
-                if (imageElement) {
-                  imageElement.src = imageUrl;
-                  imageElement.onload = () => console.log("🖼️ Image loaded successfully!");
-                  imageElement.onerror = (e) => console.error("🚫 Image failed to load:", e);
-                } else {
-                  console.error("❌ Image element not found");
-                }
-              } else {
-                console.error("Empty response data");
-                showErrorFrame("Empty Data");
-              }
-            } catch (error) {
-              console.error("❌ Axios error:", error);
-              showErrorFrame(`Error: ${error.message}`);
-            }
-          }, "image/jpeg", 0.9);
-        } catch (error) {
-          console.error("❌ Canvas error:", error);
-          showErrorFrame(`Canvas Error: ${error.message}`);
         }
-      };
-      
-      // Helper function to show error message on the frame
-      const showErrorFrame = (message) => {
+
+        try {
+            const context = canvasRef.current.getContext("2d");
+
+            // Make sure video is playing and has dimensions before capturing
+            if (!videoRef.current.videoWidth || !videoRef.current.videoHeight) {
+                console.log("⚠️ Video dimensions not available yet");
+                return;
+            }
+
+            // Set canvas size to match video
+            canvasRef.current.width = videoRef.current.videoWidth;
+            canvasRef.current.height = videoRef.current.videoHeight;
+
+            // Draw video frame to canvas
+            context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+            console.log(`🖼️ Frame captured: ${canvasRef.current.width}x${canvasRef.current.height}`);
+
+            // Create blob from canvas
+            canvasRef.current.toBlob(async (blob) => {
+                if (!blob) {
+                    console.error("Failed to create blob from canvas");
+                    return;
+                }
+
+                console.log(`🧩 Blob created: ${blob.size} bytes`);
+                const formData = new FormData();
+                formData.append("frame", blob, "frame.jpg");
+
+                try {
+                    console.log("📤 Sending request to backend...");
+                    const response = await axios.post(
+                        "http://localhost:5000/api/process_frame",
+                        formData,
+                        {
+                            responseType: "blob",
+                            withCredentials: true,
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            },
+                            timeout: 5000 // Shorter timeout for faster feedback
+                        }
+                    );
+
+                    console.log("📥 Response received:", response.status);
+
+                    if (response.data && response.data.size > 0) {
+                        console.log(`📊 Response data size: ${response.data.size} bytes`);
+                        const imageUrl = URL.createObjectURL(response.data);
+                        const imageElement = document.getElementById("processed-frame");
+                        if (imageElement) {
+                            imageElement.src = imageUrl;
+                            imageElement.onload = () => console.log("🖼️ Image loaded successfully!");
+                            imageElement.onerror = (e) => console.error("🚫 Image failed to load:", e);
+                        } else {
+                            console.error("❌ Image element not found");
+                        }
+                    } else {
+                        console.error("Empty response data");
+                        showErrorFrame("Empty Data");
+                    }
+                } catch (error) {
+                    console.error("❌ Axios error:", error);
+                    showErrorFrame(`Error: ${error.message}`);
+                }
+            }, "image/jpeg", 0.9);
+        } catch (error) {
+            console.error("❌ Canvas error:", error);
+            showErrorFrame(`Canvas Error: ${error.message}`);
+        }
+    };
+
+    // Helper function to show error message on the frame
+    const showErrorFrame = (message) => {
         const imageElement = document.getElementById("processed-frame");
         if (imageElement) {
-          const errorCanvas = document.createElement("canvas");
-          errorCanvas.width = 640;
-          errorCanvas.height = 480;
-          const ctx = errorCanvas.getContext("2d");
-          ctx.fillStyle = "black";
-          ctx.fillRect(0, 0, 640, 480);
-          ctx.fillStyle = "red";
-          ctx.font = "20px Arial";
-          ctx.fillText(message, 220, 240);
-          ctx.fillText("Check console for details", 180, 280);
-          
-          imageElement.src = errorCanvas.toDataURL();
+            const errorCanvas = document.createElement("canvas");
+            errorCanvas.width = 640;
+            errorCanvas.height = 480;
+            const ctx = errorCanvas.getContext("2d");
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, 640, 480);
+            ctx.fillStyle = "red";
+            ctx.font = "20px Arial";
+            ctx.fillText(message, 220, 240);
+            ctx.fillText("Check console for details", 180, 280);
+
+            imageElement.src = errorCanvas.toDataURL();
         }
-      }; 
+    };
     const formatTime = (timeInSeconds) => {
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = timeInSeconds % 60;
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
     useEffect(() => {
-        if (tracking && videoRef.current && !streaming) {
-            console.log("🎬 Video DOM is ready, starting webcam...");
-            startWebcam(); // 👈 now videoRef is guaranteed
+        if (tracking && videoRef.current) {
+            console.log("🎬 Video DOM is ready, starting webcam (or restarting due to toggle)...");
+            startWebcam();
         }
-    }, [tracking, videoRef, streaming]);
+
+        return () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [tracking, isFrontCamera]); // ✅ include isFrontCamera
+
 
     useEffect(() => {
         console.log("🎯 useEffect | tracking:", tracking, "| streaming:", streaming);
@@ -482,6 +507,34 @@ const Exercise = () => {
         };
         getCamera();
     }, []);
+
+    useEffect(() => {
+        let pollInterval;
+
+        if (tracking) {
+            pollInterval = setInterval(async () => {
+                try {
+                    const res = await axios.get("http://localhost:5000/api/get_event", {
+                        withCredentials: true
+                    });
+
+                    if (res.data?.event) {
+                        console.log("🎯 Event from backend:", res.data.event);
+                        setEventMessage(res.data.event);
+
+                        // 🔊 Speak it using browser TTS
+                        const utterance = new SpeechSynthesisUtterance(res.data.event);
+                        window.speechSynthesis.speak(utterance);
+
+                    }
+                } catch (err) {
+                    console.error("Event polling failed:", err);
+                }
+            }, 5000);
+        }
+
+        return () => clearInterval(pollInterval);
+    }, [tracking]);
 
     const exerciseGif = getExerciseGif();
     const exerciseInstructions = getExerciseInstructions();
@@ -683,6 +736,15 @@ const Exercise = () => {
                                 height="480"
                                 style={{ border: "2px solid #000", borderRadius: "8px" }}
                             />
+                            {eventMessage && (
+                                <div className="event-feedback">
+                                    <strong>🗣️ {eventMessage}</strong>
+                                </div>
+                            )}
+                            <button className="camera-toggle-btn" onClick={handleToggleCamera}>
+                                🔄 Switch to {isFrontCamera ? "Back" : "Front"} Camera
+                            </button>
+
                         </div>
                     )}
                     {!tracking && (

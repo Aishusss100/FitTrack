@@ -25,9 +25,9 @@ os.makedirs(audio_temp_dir, exist_ok=True)
 tts_engine = pyttsx3.init()
 
 def announce_target_achieved():
-    """Announce that the target is achieved."""
-    tts_engine.say("Target achieved!")
-    tts_engine.runAndWait()
+    global latest_event_message
+    latest_event_message = "Target achieved!"
+
 
 exercises = {
     'bicep_curl_left': {'counter': 0, 'stage': None},
@@ -326,9 +326,22 @@ def speak_feedback(text):
     thread.start()
     return True
 
+
+latest_event_message = None
+
 def announce_feedback(feedback):
-    """Provide posture feedback."""
-    speak_feedback(f"{feedback}")
+    global latest_event_message
+    latest_event_message = feedback  # Only store, don’t play
+
+def get_latest_event():
+    global latest_event_message
+    return latest_event_message
+
+def clear_latest_event():
+    global latest_event_message
+    latest_event_message = None
+
+
 
 def check_posture(landmarks):
     # Extract relevant landmarks for posture assessment

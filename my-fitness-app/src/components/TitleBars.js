@@ -166,6 +166,25 @@ function TitleBarLogin() {
     </header>
   );
 }
+// Add this new About Title Bar
+function TitleBarAbout({ toggleSidebar }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => navigate("/login");
+  const goToHome = () => navigate("/home");
+
+  return (
+    <header className="TitleBar">
+      <button className="sidebar-button" onClick={toggleSidebar}>☰</button>
+      <h1>About</h1>
+      <div className="button-group">
+        <button className="home-button" onClick={goToHome}>Home</button>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </header>
+  );
+}
+
 
 // Main TitleBars Component (Router-based)
 function TitleBars({ toggleSidebar }) {
@@ -181,13 +200,16 @@ function TitleBars({ toggleSidebar }) {
       return <TitleBarProfile toggleSidebar={toggleSidebar} />;
     case pathname === "/progress":
       return <TitleBarProgress toggleSidebar={toggleSidebar} />;
-    case pathname === "/goals": // New case for the goal tracker
+    case pathname === "/goals":
       return <TitleBarGoals toggleSidebar={toggleSidebar} />;
+    case pathname === "/about":
+      return <TitleBarAbout toggleSidebar={toggleSidebar} />;
     case pathname === "/login":
       return <TitleBarLogin />;
     default:
       return null;
   }
+  
 }
 
 export default TitleBars;
