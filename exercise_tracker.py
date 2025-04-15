@@ -594,6 +594,21 @@ def process_incoming_frame(frame_bytes):
                     # Display angle on screen at elbow point
                     cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+                elif current_exercise == 'bicep_curl_right':
+                    process_bicep_curl(landmarks, side='RIGHT')
+                    shoulderl = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                        landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                    elbowl = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+                    wristl = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                            landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                    angle = calculate_angle(shoulderl, elbowl, wristl)
+                    # Convert landmark coordinates to screen pixels
+                    h, w, _ = image.shape
+                    elbowl_x, elbowl_y = int(elbowl[0] * w), int(elbowl[1] * h)
+                    # Display angle on screen at elbow point
+                    cv2.putText(image, str(int(angle)), (elbowl_x, elbowl_y), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
                 elif current_exercise == 'overhead_press_left':
                         process_overhead_press(landmarks, side='LEFT')
                         shoulderl = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
