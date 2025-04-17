@@ -66,6 +66,13 @@ const ProgressPage = () => {
     fetchProgressData();
   }, [viewType, selectedExercise]);
 
+  // Format seconds to min:sec format
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const chartData = {
     labels: progressData.map((entry) => entry.date),
     datasets: [
@@ -186,7 +193,7 @@ const ProgressPage = () => {
                     <strong>Reps:</strong> {entry.reps}
                   </p>
                   <p>
-                    <strong>Duration:</strong> {(entry.duration / 60).toFixed(2)} mins
+                    <strong>Duration:</strong> {formatDuration(entry.duration)}
                   </p>
                   <p>
                     <strong>Efficiency:</strong> {(entry.reps / entry.duration).toFixed(2)}

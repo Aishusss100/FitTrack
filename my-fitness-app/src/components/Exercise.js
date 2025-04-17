@@ -330,7 +330,7 @@ const Exercise = () => {
 
 
     const handleStop = async () => {
-        if (!window.confirm("Are you sure you want to stop this exercise?")) return;
+        //if (!window.confirm("Are you sure you want to stop this exercise?")) return;
 
         try {
             // ✅ Stop webcam
@@ -520,17 +520,23 @@ const Exercise = () => {
 
                     if (res.data?.event) {
                         console.log("🎯 Event from backend:", res.data.event);
+                    
+                        // ✅ Auto-stop if target achieved
+                        if (res.data.event === "TARGET_ACHIEVED") {
+                            console.log("✅ Target achieved! Stopping...");
+                            handleStop();
+                            return;
+                        }
+                    
                         setEventMessage(res.data.event);
-
-                        // 🔊 Speak it using browser TTS
                         const utterance = new SpeechSynthesisUtterance(res.data.event);
                         window.speechSynthesis.speak(utterance);
-
                     }
+                    
                 } catch (err) {
                     console.error("Event polling failed:", err);
                 }
-            }, 5000);
+            }, 1000);
         }
 
         return () => clearInterval(pollInterval);

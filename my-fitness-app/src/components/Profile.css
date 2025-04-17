@@ -46,6 +46,7 @@ body {
     background-color: #4a2626;
     border-radius: 8px;
     padding: 20px;
+    padding-top: 90px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     height: fit-content;
     animation: fadeInLeft 1s ease-out;
@@ -328,4 +329,87 @@ body {
     .edit-actions {
         margin-top: 10px;
     }
+}
+/* Calories Summary Section */
+.calories-summary {
+    margin-top: 2rem;
+    background-color: #fbf5f5;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-top: 3px solid #800000;
+}
+
+.calories-summary h3 {
+    margin-top: 0;
+    color: #800000;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+}
+
+.calories-summary h3:after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: #800000;
+    margin: 8px auto;
+}
+
+.calories-cards {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.calories-card {
+    flex: 1;
+    min-width: 220px;
+    padding: 1.2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-bottom: 3px solid #800000;
+}
+
+.calories-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.calories-card h4 {
+    margin-top: 0;
+    color: #800000;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.8rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.calories-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    border-bottom: 1px dotted #e0e0e0;
+}
+
+.calories-detail:last-child {
+    border-bottom: none;
+}
+
+.calories-detail span:first-child {
+    color: #666;
+}
+
+.calories-detail span:last-child {
+    font-weight: 600;
+    color: #800000;
 }

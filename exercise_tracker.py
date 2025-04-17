@@ -334,7 +334,9 @@ def announce_feedback(feedback):
     latest_event_message = feedback  # Only store, don’t play
 
 def get_latest_event():
-    global latest_event_message
+    global latest_event_message, target_achieved
+    if target_achieved:
+        return "TARGET_ACHIEVED"
     return latest_event_message
 
 def clear_latest_event():

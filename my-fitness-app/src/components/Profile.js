@@ -19,6 +19,11 @@ const Profile = () => {
         email: ''
     });
     const [updateMessage, setUpdateMessage] = useState('');
+    const [caloriesData, setCaloriesData] = useState({
+        weekly: { calories_burned: 0, total_reps: 0, total_duration: 0 },
+        monthly: { calories_burned: 0, total_reps: 0, total_duration: 0 }
+    });
+    const [caloriesLoading, setCaloriesLoading] = useState(true);
 
     // List of all exercises to track
     const exercises = [
@@ -83,6 +88,9 @@ const Profile = () => {
                 const performanceResults = await Promise.all(performancePromises);
                 setExercisePerformance(performanceResults);
                 setLoading(false);
+
+                // Fetch calories data
+                await fetchCaloriesData();
             } catch (error) {
                 console.error('Error fetching profile data:', error);
                 setError(error.response?.data?.message || 'Failed to load profile data');
@@ -92,6 +100,35 @@ const Profile = () => {
 
         fetchProfileData();
     }, []);
+
+    // Function to fetch calories data
+    const fetchCaloriesData = async () => {
+        try {
+            setCaloriesLoading(true);
+            
+            // Fetch weekly calories
+            const weeklyResponse = await axios.get('http://localhost:5000/api/get_total_calories', {
+                params: { view_type: 'weekly' },
+                withCredentials: true
+            });
+            
+            // Fetch monthly calories
+            const monthlyResponse = await axios.get('http://localhost:5000/api/get_total_calories', {
+                params: { view_type: 'monthly' },
+                withCredentials: true
+            });
+            
+            setCaloriesData({
+                weekly: weeklyResponse.data,
+                monthly: monthlyResponse.data
+            });
+            
+            setCaloriesLoading(false);
+        } catch (error) {
+            console.error('Error fetching calories data:', error);
+            setCaloriesLoading(false);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -142,10 +179,17 @@ const Profile = () => {
         }
     };
 
+    // Format duration to display in minutes and seconds
+    const formatDuration = (durationInSeconds) => {
+        const minutes = Math.floor(durationInSeconds / 60);
+        const seconds = durationInSeconds % 60;
+        return `${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
+    };
+
     if (loading) {
         return (
             <div className="profile-container">
-                <h1>My Profile</h1>
+                <h1 className="profile-title">My Profile</h1>
                 <div className="loading">Loading profile data...</div>
             </div>
         );
@@ -154,7 +198,7 @@ const Profile = () => {
     if (error) {
         return (
             <div className="profile-container">
-                <h1>My Profile</h1>
+                <h1 className="profile-title">My Profile</h1>
                 <div className="error-message">{error}</div>
             </div>
         );
@@ -228,6 +272,47 @@ const Profile = () => {
                         <span className="field-value">{profileData.email || 'Not provided'}</span>
                     )}
                 </div>
+
+                {/* Calories Summary Section */}
+                <div className="calories-summary">
+                    <h3>Fitness Progress Summary</h3>
+                    {caloriesLoading ? (
+                        <div className="loading">Loading calories data...</div>
+                    ) : (
+                        <div className="calories-cards">
+                            <div className="calories-card">
+                                <h4>Last 7 Days</h4>
+                                <div className="calories-detail">
+                                    <span>Calories Burned:</span>
+                                    <span>{caloriesData.weekly.calories_burned.toFixed(2)} cal</span>
+                                </div>
+                                <div className="calories-detail">
+                                    <span>Total Reps:</span>
+                                    <span>{caloriesData.weekly.total_reps}</span>
+                                </div>
+                                <div className="calories-detail">
+                                    <span>Total Duration:</span>
+                                    <span>{formatDuration(caloriesData.weekly.total_duration)}</span>
+                                </div>
+                            </div>
+                            <div className="calories-card">
+                                <h4>Last 30 Days</h4>
+                                <div className="calories-detail">
+                                    <span>Calories Burned:</span>
+                                    <span>{caloriesData.monthly.calories_burned.toFixed(2)} cal</span>
+                                </div>
+                                <div className="calories-detail">
+                                    <span>Total Reps:</span>
+                                    <span>{caloriesData.monthly.total_reps}</span>
+                                </div>
+                                <div className="calories-detail">
+                                    <span>Total Duration:</span>
+                                    <span>{formatDuration(caloriesData.monthly.total_duration)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="exercise-performance-container">
@@ -246,7 +331,7 @@ const Profile = () => {
                             </div>
                             <div className="performance-detail">
                                 <span>Best Duration:</span>
-                                <span>{perf.bestDuration} sec</span>
+                                <span>{formatDuration(perf.bestDuration)}</span>
                             </div>
                         </div>
                     ))}
